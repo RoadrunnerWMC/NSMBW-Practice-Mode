@@ -9,6 +9,12 @@
     </options>
     <patch id="nsmbw_practice_mode">
         <folder external="./" disc="/" create="true" recursive="true" />
+        <folder external="Lang" disc="/EU" recursive="true" />
+        <folder external="Lang" disc="/US" recursive="true" />
+        <folder external="Lang" disc="/JP" recursive="true" />
+        <folder external="Lang" disc="/KR" recursive="true" />
+        <folder external="Lang" disc="/TW" recursive="true" />
+        <folder external="Lang" disc="/CN" recursive="true" />
         <memory offset="0x80001900" valuefile="Code/loader.bin" />
         <memory offset="0x80328478" value="80001970" original="8015BC60" />
         <memory offset="0x80328130" value="80001970" original="8015BB20" />
