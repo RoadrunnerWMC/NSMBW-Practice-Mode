@@ -266,6 +266,7 @@ public:
 
     static dCamera_c *m_camera[1];
     static dScStage_c *m_instance;
+    static u32 mCollectionCoin[3];
 };
 
 
@@ -280,6 +281,10 @@ class dActorCreateMng_c {
 public:
     void doStuffForCurrentZone();
     static dActorCreateMng_c *m_instance;
+
+    /* 0x000 */ u32 counters[4];
+    /* 0x010 */ u16 storedShorts[1000];
+    /* 0x7e0 */ u8 storedBytes[1000];
 };
 
 class LytTextBox_c {
@@ -373,4 +378,27 @@ public:
     /* 0x04 */ dGameKeyCore_c *remocons[4];
 
     static dGameKey_c *m_instance;
+};
+
+
+class dFlagCtrl_c {
+public:
+    void clearAllFlagData();
+
+    static dFlagCtrl_c *m_instance;
+};
+
+
+class dCyuukan_c {
+public:
+    void clear();
+};
+
+
+class dInfo_c {
+public:
+    static dInfo_c *m_instance;
+
+    /* 0x000 */ u8 pad[0x008];
+    /* 0x008 */ dCyuukan_c cyuukan;
 };

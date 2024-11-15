@@ -23,6 +23,8 @@ void save_state(dAcPy_c *player, SavestateLite *state) {
     memcpy(&state->bgParam, dBgParameter_c::ms_Instance_p, sizeof(dBgParameter_c));
 
     state->timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
+
+    // TODO: also save/restore all the random things that get reset in zone_reload.cpp
 }
 
 
