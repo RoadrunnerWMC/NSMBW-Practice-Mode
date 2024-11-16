@@ -33,53 +33,60 @@ fake:
 }
 
 
+void save_initial_zone_state() {
+    initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
+}
+
+
+void restore_initial_zone_state() {
+    // Reset stored sprite data in dActorCreateMng_c
+    // (resets spawn status for various types of enemies, mainly)
+    // TODO: maybe just reset this for only the current zone, instead of
+    // the whole level?
+    // Since storedShorts and storedBytes are adjacent in memory, for
+    // efficiency, I just clear both of them with one call
+    memset(&dActorCreateMng_c::m_instance->storedShorts, 0, 2000 + 1000);
+
+    // Reset the bitfield arrays in dBgParameter_c
+    // (resets spawn status for various types of coins and blocks)
+    for (int i = 0; i < 12; i++) {
+        memset(dBgParameter_c::ms_Instance_p->tileBuffers[i], 0, 0x10000);
+    }
+    // TODO: this doesn't affect tile-based coins/blocks until the area
+    // is reloaded
+    // TODO: maybe just reset this for only the current zone, instead of
+    // the whole level?
+
+    // Reset dFlagCtrl_c
+    // (resets spawn status for star coins, red rings, roulette blocks,
+    // etc.)
+    dFlagCtrl_c::m_instance->clearAllFlagData();
+    // TODO: maybe just reset this for only the current zone, instead of
+    // the whole level?
+
+    // Reset all star coins to uncollected
+    dScStage_c::mCollectionCoin[0] = 4;
+    dScStage_c::mCollectionCoin[1] = 4;
+    dScStage_c::mCollectionCoin[2] = 4;
+
+    // If a checkpoint is collected, clear it
+    // (TODO: should really reset it to whatever it was at level load,
+    // but it seems calling cyuukan->courseIN() doesn't do that)
+    dInfo_c::m_instance->cyuukan.clear();
+
+    // Reset the timer time
+    dStageTimer_c::m_instance->preciseTime = initial_zone_state.timerPreciseTime;
+}
+
+
 // Hook at the end of dScStage_c::create()
 kmBranchDefCpp(0x80924e58, NULL, u32, ) {
     if (!is_restoring) {
-        initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
+        save_initial_zone_state();
     } else {
-        // Reset stored sprite data in dActorCreateMng_c
-        // (resets spawn status for various types of enemies, mainly)
-        // TODO: maybe just reset this for only the current zone,
-        // instead of the whole level?
-        // Since storedShorts and storedBytes are adjacent in memory,
-        // for efficiency, I just clear both of them with one call
-        memset(&dActorCreateMng_c::m_instance->storedShorts, 0, 2000 + 1000);
-
-        // Reset the bitfield arrays in dBgParameter_c
-        // (resets spawn status for various types of coins and blocks)
-        for (int i = 0; i < 12; i++) {
-            memset(dBgParameter_c::ms_Instance_p->tileBuffers[i], 0, 0x10000);
-        }
-        // TODO: this doesn't affect tile-based coins/blocks until the
-        // area is reloaded
-        // TODO: maybe just reset this for only the current zone,
-        // instead of the whole level?
-
-        // Reset dFlagCtrl_c
-        // (resets spawn status for star coins, red rings, roulette
-        // blocks, etc.)
-        dFlagCtrl_c::m_instance->clearAllFlagData();
-        // TODO: maybe just reset this for only the current zone,
-        // instead of the whole level?
-
-        // Reset all star coins to uncollected
-        dScStage_c::mCollectionCoin[0] = 4;
-        dScStage_c::mCollectionCoin[1] = 4;
-        dScStage_c::mCollectionCoin[2] = 4;
-
-        // If a checkpoint is collected, clear it
-        // (TODO: should really reset it to whatever it was at level
-        // load, but it seems calling cyuukan->courseIN() doesn't do
-        // that)
-        dInfo_c::m_instance->cyuukan.clear();
-
-        // Reset the timer time
-        dStageTimer_c::m_instance->preciseTime = initial_zone_state.timerPreciseTime;
-
+        restore_initial_zone_state();
         is_restoring = false;
     }
-
     return 1;
 }
 
