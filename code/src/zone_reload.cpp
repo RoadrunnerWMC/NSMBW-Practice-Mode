@@ -10,6 +10,7 @@ bool ForceFacingLeft = false;
 
 struct ZoneState {
     u32 timerPreciseTime;
+    u32 starCoinCollectionStates[3];
 };
 
 ZoneState initial_zone_state;
@@ -35,6 +36,9 @@ fake:
 
 void save_initial_zone_state() {
     initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
+    initial_zone_state.starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
+    initial_zone_state.starCoinCollectionStates[1] = dScStage_c::mCollectionCoin[1];
+    initial_zone_state.starCoinCollectionStates[2] = dScStage_c::mCollectionCoin[2];
 }
 
 
@@ -64,10 +68,10 @@ void restore_initial_zone_state() {
     // TODO: maybe just reset this for only the current zone, instead of
     // the whole level?
 
-    // Reset all star coins to uncollected
-    dScStage_c::mCollectionCoin[0] = 4;
-    dScStage_c::mCollectionCoin[1] = 4;
-    dScStage_c::mCollectionCoin[2] = 4;
+    // Reset all star coins to their original collection states
+    dScStage_c::mCollectionCoin[0] = initial_zone_state.starCoinCollectionStates[0];
+    dScStage_c::mCollectionCoin[1] = initial_zone_state.starCoinCollectionStates[1];
+    dScStage_c::mCollectionCoin[2] = initial_zone_state.starCoinCollectionStates[2];
 
     // If a checkpoint is collected, clear it
     // (TODO: should really reset it to whatever it was at level load,
