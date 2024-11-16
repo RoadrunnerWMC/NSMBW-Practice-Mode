@@ -41,3 +41,4 @@ mCoin__9daPyMng_c=0x803551a0
 mNum__9daPyMng_c=0x80429f80
 mActPlayerInfo__9daPyMng_c=0x80429f88
 mScore__9daPyMng_c=0x80429fa0
+getPlayer__9daPyMng_cFi=0x8005f900

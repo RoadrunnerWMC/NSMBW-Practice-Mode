@@ -7,19 +7,25 @@
 NextGoto FakeEntrance = {0};
 bool ForceFacingLeft = false;
 
+struct PlayerState {
+    u32 lives;
+    u32 coins;
+    int powerup;
+    int starTimer;
+};
 
 struct ZoneState {
     u32 numLivePlayers;
     u32 activePlayersBitfield;
-    u32 livesPerPlayer[4];
-    u32 coinsPerPlayer[4];
     u32 score;
     u32 timerPreciseTime;
     u32 starCoinCollectionStates[3];
+    PlayerState playerStates[4];
 };
 
 ZoneState initial_zone_state;
-bool is_restoring = false;
+bool is_restoring_stage = false;
+bool is_restoring_players = false;
 
 
 u8 curEntranceNonFake = 0;
@@ -42,14 +48,14 @@ fake:
 void save_initial_zone_state() {
     initial_zone_state.numLivePlayers = daPyMng_c::mNum;
     initial_zone_state.activePlayersBitfield = daPyMng_c::mActPlayerInfo;
-    initial_zone_state.livesPerPlayer[0] = daPyMng_c::mRest[0];
-    initial_zone_state.livesPerPlayer[1] = daPyMng_c::mRest[1];
-    initial_zone_state.livesPerPlayer[2] = daPyMng_c::mRest[2];
-    initial_zone_state.livesPerPlayer[3] = daPyMng_c::mRest[3];
-    initial_zone_state.coinsPerPlayer[0] = daPyMng_c::mCoin[0];
-    initial_zone_state.coinsPerPlayer[1] = daPyMng_c::mCoin[1];
-    initial_zone_state.coinsPerPlayer[2] = daPyMng_c::mCoin[2];
-    initial_zone_state.coinsPerPlayer[3] = daPyMng_c::mCoin[3];
+    initial_zone_state.playerStates[0].lives = daPyMng_c::mRest[0];
+    initial_zone_state.playerStates[1].lives = daPyMng_c::mRest[1];
+    initial_zone_state.playerStates[2].lives = daPyMng_c::mRest[2];
+    initial_zone_state.playerStates[3].lives = daPyMng_c::mRest[3];
+    initial_zone_state.playerStates[0].coins = daPyMng_c::mCoin[0];
+    initial_zone_state.playerStates[1].coins = daPyMng_c::mCoin[1];
+    initial_zone_state.playerStates[2].coins = daPyMng_c::mCoin[2];
+    initial_zone_state.playerStates[3].coins = daPyMng_c::mCoin[3];
     initial_zone_state.score = daPyMng_c::mScore;
     initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
     initial_zone_state.starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
@@ -97,14 +103,14 @@ void restore_initial_zone_state() {
     // Reset daPyMng_c fields
     daPyMng_c::mNum = initial_zone_state.numLivePlayers;
     daPyMng_c::mActPlayerInfo = initial_zone_state.activePlayersBitfield;
-    daPyMng_c::mRest[0] = initial_zone_state.livesPerPlayer[0];
-    daPyMng_c::mRest[1] = initial_zone_state.livesPerPlayer[1];
-    daPyMng_c::mRest[2] = initial_zone_state.livesPerPlayer[2];
-    daPyMng_c::mRest[3] = initial_zone_state.livesPerPlayer[3];
-    daPyMng_c::mCoin[0] = initial_zone_state.coinsPerPlayer[0];
-    daPyMng_c::mCoin[1] = initial_zone_state.coinsPerPlayer[1];
-    daPyMng_c::mCoin[2] = initial_zone_state.coinsPerPlayer[2];
-    daPyMng_c::mCoin[3] = initial_zone_state.coinsPerPlayer[3];
+    daPyMng_c::mRest[0] = initial_zone_state.playerStates[0].lives;
+    daPyMng_c::mRest[1] = initial_zone_state.playerStates[1].lives;
+    daPyMng_c::mRest[2] = initial_zone_state.playerStates[2].lives;
+    daPyMng_c::mRest[3] = initial_zone_state.playerStates[3].lives;
+    daPyMng_c::mCoin[0] = initial_zone_state.playerStates[0].coins;
+    daPyMng_c::mCoin[1] = initial_zone_state.playerStates[1].coins;
+    daPyMng_c::mCoin[2] = initial_zone_state.playerStates[2].coins;
+    daPyMng_c::mCoin[3] = initial_zone_state.playerStates[3].coins;
     daPyMng_c::mScore = initial_zone_state.score;
 
     // Reset the timer time
@@ -112,16 +118,59 @@ void restore_initial_zone_state() {
 }
 
 
+void save_initial_zone_state_players() {
+    for (int i = 0; i < 4; i++) {
+        dAcPy_c *player = daPyMng_c::getPlayer(i);
+        if (player == NULL)
+            continue;
+
+        initial_zone_state.playerStates[i].powerup = player->powerup;
+        initial_zone_state.playerStates[i].starTimer = player->starTimer;
+    }
+}
+
+
+void restore_initial_zone_state_players() {
+    for (int i = 0; i < 4; i++) {
+        dAcPy_c *player = daPyMng_c::getPlayer(i);
+        if (player == NULL)
+            continue;
+
+        player->setPowerupAlt((Powerup)(initial_zone_state.playerStates[i].powerup));
+
+        u32 starTimer = initial_zone_state.playerStates[i].starTimer;
+        if (starTimer == 0) {
+            player->vtable->endStar(player);
+        } else {
+            player->vtable->startStar(player, 1, starTimer);
+        }
+    }
+}
+
+
 // Hook at the end of dScStage_c::create()
 kmBranchDefCpp(0x80924e58, NULL, u32, ) {
-    if (!is_restoring) {
+    if (!is_restoring_stage) {
         save_initial_zone_state();
     } else {
         restore_initial_zone_state();
-        is_restoring = false;
+        is_restoring_stage = false;
     }
     return 1;
 }
+
+// Hook at the end of daPyMng_c::createCourseInit()
+// (this hook needs to exist because players are created after
+// dScStage_c::create() finishes executing)
+kmBranchDefCpp(0x8005f4cc, NULL, void, ) {
+    if (!is_restoring_players) {
+        save_initial_zone_state_players();
+    } else {
+        restore_initial_zone_state_players();
+        is_restoring_players = false;
+    }
+}
+
 
 
 void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
@@ -137,7 +186,8 @@ void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
 
     player->useNextGotoBlock(FAKE_ENTRANCE_ID, 0, 0);
 
-    is_restoring = true;
+    is_restoring_stage = true;
+    is_restoring_players = true;
 }
 
 

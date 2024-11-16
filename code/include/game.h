@@ -120,8 +120,9 @@ public:
 
     /* 0xea4 */ dAcPyKey_c input;
 
-    /* 0x1008 */ u8 pad5[0x6c];
+    /* 0x1008 */ u8 pad5[0x68];
 
+    /* 0x1070 */ u32 starTimer;
     /* 0x1074 */ u32 flashTimer;
 
     /* 0x1078 */ u8 pad6[0x18];
@@ -147,6 +148,8 @@ public:
     static u32 mNum;
     static u32 mScore;
     static u32 mActPlayerInfo;
+
+    static dAcPy_c *getPlayer(int num);
 };
 
 
