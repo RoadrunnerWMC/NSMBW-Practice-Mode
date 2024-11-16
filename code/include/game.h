@@ -140,6 +140,16 @@ public:
 };
 
 
+class daPyMng_c {
+public:
+    static u32 mRest[4];
+    static u32 mCoin[4];
+    static u32 mNum;
+    static u32 mScore;
+    static u32 mActPlayerInfo;
+};
+
+
 class dBgParameter_c {
 public:
     /* 0x00 */ void *vtable;

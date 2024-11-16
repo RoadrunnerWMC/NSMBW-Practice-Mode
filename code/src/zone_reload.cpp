@@ -9,6 +9,11 @@ bool ForceFacingLeft = false;
 
 
 struct ZoneState {
+    u32 numLivePlayers;
+    u32 activePlayersBitfield;
+    u32 livesPerPlayer[4];
+    u32 coinsPerPlayer[4];
+    u32 score;
     u32 timerPreciseTime;
     u32 starCoinCollectionStates[3];
 };
@@ -35,6 +40,17 @@ fake:
 
 
 void save_initial_zone_state() {
+    initial_zone_state.numLivePlayers = daPyMng_c::mNum;
+    initial_zone_state.activePlayersBitfield = daPyMng_c::mActPlayerInfo;
+    initial_zone_state.livesPerPlayer[0] = daPyMng_c::mRest[0];
+    initial_zone_state.livesPerPlayer[1] = daPyMng_c::mRest[1];
+    initial_zone_state.livesPerPlayer[2] = daPyMng_c::mRest[2];
+    initial_zone_state.livesPerPlayer[3] = daPyMng_c::mRest[3];
+    initial_zone_state.coinsPerPlayer[0] = daPyMng_c::mCoin[0];
+    initial_zone_state.coinsPerPlayer[1] = daPyMng_c::mCoin[1];
+    initial_zone_state.coinsPerPlayer[2] = daPyMng_c::mCoin[2];
+    initial_zone_state.coinsPerPlayer[3] = daPyMng_c::mCoin[3];
+    initial_zone_state.score = daPyMng_c::mScore;
     initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
     initial_zone_state.starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
     initial_zone_state.starCoinCollectionStates[1] = dScStage_c::mCollectionCoin[1];
@@ -77,6 +93,19 @@ void restore_initial_zone_state() {
     // (TODO: should really reset it to whatever it was at level load,
     // but it seems calling cyuukan->courseIN() doesn't do that)
     dInfo_c::m_instance->cyuukan.clear();
+
+    // Reset daPyMng_c fields
+    daPyMng_c::mNum = initial_zone_state.numLivePlayers;
+    daPyMng_c::mActPlayerInfo = initial_zone_state.activePlayersBitfield;
+    daPyMng_c::mRest[0] = initial_zone_state.livesPerPlayer[0];
+    daPyMng_c::mRest[1] = initial_zone_state.livesPerPlayer[1];
+    daPyMng_c::mRest[2] = initial_zone_state.livesPerPlayer[2];
+    daPyMng_c::mRest[3] = initial_zone_state.livesPerPlayer[3];
+    daPyMng_c::mCoin[0] = initial_zone_state.coinsPerPlayer[0];
+    daPyMng_c::mCoin[1] = initial_zone_state.coinsPerPlayer[1];
+    daPyMng_c::mCoin[2] = initial_zone_state.coinsPerPlayer[2];
+    daPyMng_c::mCoin[3] = initial_zone_state.coinsPerPlayer[3];
+    daPyMng_c::mScore = initial_zone_state.score;
 
     // Reset the timer time
     dStageTimer_c::m_instance->preciseTime = initial_zone_state.timerPreciseTime;
