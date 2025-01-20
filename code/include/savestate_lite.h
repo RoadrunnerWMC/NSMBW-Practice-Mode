@@ -24,6 +24,10 @@ struct PlayerSavestateLite {
 
 
 struct SavestateLite {
+    u8 world_num;
+    u8 level_num;
+    u8 area_num;
+    u8 zone_num;
     PlayerSavestateLite player;
     dBgParameter_c bgParam;
     u32 timerPreciseTime;
@@ -31,4 +35,4 @@ struct SavestateLite {
 
 
 void save_state(dAcPy_c *player, SavestateLite *state);
-void restore_state(dAcPy_c *player, SavestateLite *state);
+bool restore_state(dAcPy_c *player, SavestateLite *state);

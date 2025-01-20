@@ -227,9 +227,7 @@ int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
         }
 
         if (virtual_buttons_pressed & VBUTTON_SAVESTATE_RESTORE) {
-            if (SavedStateValid) {
-                restore_state(this_, &SavedState);
-            } else {
+            if (!SavedStateValid || !restore_state(this_, &SavedState)) {
                 this_->playSound(SE_SYS_INVALID, 1);
             }
         }

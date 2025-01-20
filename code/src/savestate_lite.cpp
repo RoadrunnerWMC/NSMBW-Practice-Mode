@@ -3,6 +3,10 @@
 
 
 void save_state(dAcPy_c *player, SavestateLite *state) {
+    state->world_num = dScStage_c::m_instance->curWorld;
+    state->level_num = dScStage_c::m_instance->curLevel;
+    state->area_num = dScStage_c::m_instance->curArea;
+    state->zone_num = dScStage_c::m_instance->curZone;
     state->player.pos = player->pos;
     state->player.lastPos = player->lastPos;
     state->player.moveDelta = player->moveDelta;
@@ -28,7 +32,14 @@ void save_state(dAcPy_c *player, SavestateLite *state) {
 }
 
 
-void restore_state(dAcPy_c *player, SavestateLite *state) {
+bool restore_state(dAcPy_c *player, SavestateLite *state) {
+    if (state->world_num != dScStage_c::m_instance->curWorld
+            || state->level_num != dScStage_c::m_instance->curLevel
+            || state->area_num != dScStage_c::m_instance->curArea
+            || state->zone_num != dScStage_c::m_instance->curZone) {
+        return false;
+    }
+
     player->pos = state->player.pos;
     player->lastPos = state->player.lastPos;
     player->moveDelta = state->player.moveDelta;
@@ -61,4 +72,6 @@ void restore_state(dAcPy_c *player, SavestateLite *state) {
     }
 
     dActorCreateMng_c::m_instance->doStuffForCurrentZone();
+
+    return true;
 }
