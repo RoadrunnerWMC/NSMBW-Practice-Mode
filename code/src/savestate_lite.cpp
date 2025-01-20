@@ -1,14 +1,9 @@
 #include "game.h"
 #include "savestate_lite.h"
 
-// World num, level num, area num, and zone num are all stored in
-// dScStage_c as u8s starting at 0x120c (an offset which is 32-bit
-// aligned) which means we can do this fun little optimization
-#define CURRENT_WORLD_LEVEL_AREA_AND_ZONE (*((u32*)(&dScStage_c::m_instance->curWorld)))
-
 
 void save_state(dAcPy_c *player, SavestateLite *state) {
-    state->world_level_area_and_zone = CURRENT_WORLD_LEVEL_AREA_AND_ZONE;
+    state->world_level_area_and_zone = dScStage_c::m_instance->curWorldLevelAreaAndZone;
     state->player.pos = player->pos;
     state->player.lastPos = player->lastPos;
     state->player.moveDelta = player->moveDelta;
@@ -35,7 +30,7 @@ void save_state(dAcPy_c *player, SavestateLite *state) {
 
 
 bool restore_state(dAcPy_c *player, SavestateLite *state) {
-    if (state->world_level_area_and_zone != CURRENT_WORLD_LEVEL_AREA_AND_ZONE) {
+    if (state->world_level_area_and_zone != dScStage_c::m_instance->curWorldLevelAreaAndZone) {
         return false;
     }
 
