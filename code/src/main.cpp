@@ -210,12 +210,18 @@ kmBranchDefAsm(0x800b5e30, 0x800b5e34) {
 }
 
 
+bool is_title_screen_stage() {
+    // 01-40.arc
+    return dScStage_c::m_instance->curWorld == 0 && dScStage_c::m_instance->curLevel == 39;
+}
+
+
 extern "C" int daPlBase_c_execute(daPlBase_c *this_);
 
 int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
     int res = daPlBase_c_execute(this_);
 
-    if (this_->input.remoconID != -1) {
+    if (!is_title_screen_stage() && this_->input.remoconID != -1) {
         u32 array_id = (u32)(dGameKey_c::m_instance->remocons[this_->input.remoconID]->id);
         u32 virtual_buttons_pressed = VirtualButtonsPressed[array_id];
 
