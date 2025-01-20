@@ -270,14 +270,17 @@ public:
 class dScStage_c {
 public:
     u8 pad[0x120c];
-    // Using a union so we can access the world/level/area/zone numbers
-    // together as a single u32 as an optimization
+    // Using a union so we can do some optimizations in certain places
     union {
         struct {
             /* 0x120c */ u8 curWorld;
             /* 0x120d */ u8 curLevel;
             /* 0x120e */ u8 curArea;
             /* 0x120f */ u8 curZone;
+        };
+        struct {
+            /* 0x120c */ u16 curWorldAndLevel;
+            /* 0x120e */ u16 curAreaAndZone;
         };
         /* 0x120c */ u32 curWorldLevelAreaAndZone;
     };
