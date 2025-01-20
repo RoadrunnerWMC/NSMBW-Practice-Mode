@@ -24,10 +24,7 @@ struct PlayerSavestateLite {
 
 
 struct SavestateLite {
-    u8 world_num;
-    u8 level_num;
-    u8 area_num;
-    u8 zone_num;
+    u32 world_level_area_and_zone;
     PlayerSavestateLite player;
     dBgParameter_c bgParam;
     u32 timerPreciseTime;
