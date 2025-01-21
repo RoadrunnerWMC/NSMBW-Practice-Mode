@@ -302,12 +302,16 @@ public:
 
 class dActorCreateMng_c {
 public:
-    void doStuffForCurrentZone();
+    void ActorCreateInfoClear(void);
+    void MapActorInital_next(void);
+
     static dActorCreateMng_c *m_instance;
 
     /* 0x000 */ u32 counters[4];
     /* 0x010 */ u16 storedShorts[1000];
     /* 0x7e0 */ u8 storedBytes[1000];
+    /* 0xbc8 */ u16 unkBC8;
+    /* 0xbca */ bool isEndingDemo;
 };
 
 class LytTextBox_c {

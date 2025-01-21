@@ -33,6 +33,9 @@ bool restore_state(dAcPy_c *player, SavestateLite *state) {
     if (state->world_level_area_and_zone != dScStage_c::m_instance->curWorldLevelAreaAndZone) {
         return false;
     }
+    if (dActorCreateMng_c::m_instance->isEndingDemo) {
+        return false;
+    }
 
     player->pos = state->player.pos;
     player->lastPos = state->player.lastPos;
@@ -65,7 +68,7 @@ bool restore_state(dAcPy_c *player, SavestateLite *state) {
         }
     }
 
-    dActorCreateMng_c::m_instance->doStuffForCurrentZone();
+    dActorCreateMng_c::m_instance->MapActorInital_next();
 
     return true;
 }

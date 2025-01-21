@@ -115,6 +115,10 @@ void restore_initial_zone_state() {
 
     // Reset the timer time
     dStageTimer_c::m_instance->preciseTime = initial_zone_state.timerPreciseTime;
+
+    // Reset dActorCreateMng_c (it gets disabled when the goal pole is
+    // touched, so we'd like to re-enable it)
+    dActorCreateMng_c::m_instance->ActorCreateInfoClear();
 }
 
 
