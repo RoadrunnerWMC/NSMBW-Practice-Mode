@@ -12,6 +12,9 @@ SavestateLite SavedState = {0};
 #define SE_SYS_ROUTE_OK 187
 
 
+extern u32 RiivolutionOptionsFlags;
+
+
 // Note: this enum is only valid for input bitfields before dGameKeyCore_c::setConfigKey()
 enum Buttons {
     // bit        sideways     nunchuk
@@ -145,9 +148,15 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
     }
 
     if (this_->controllerType == SIDEWAYS) {
-        if (bitfield & BUTTON_B) {
+        u32 button_to_check_for;
+        if (RiivolutionOptionsFlags & 1) {
+            button_to_check_for = BUTTON_B;
+        } else {
+            button_to_check_for = BUTTON_A;
+        }
+        if (bitfield & button_to_check_for) {
             *virtuals_held |= VBUTTON_SAVESTATE_RESTORE;
-            *suppression |= BUTTON_B;
+            *suppression |= button_to_check_for;
         } else {
             *virtuals_held &= ~VBUTTON_SAVESTATE_RESTORE;
         }
