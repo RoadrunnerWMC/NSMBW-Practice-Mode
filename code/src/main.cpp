@@ -212,7 +212,7 @@ kmBranchDefAsm(0x800b5e30, 0x800b5e34) {
 
 bool is_title_screen_stage() {
     // 01-40.arc
-    return dScStage_c::m_instance->curWorldAndLevel == (0 << 8) | 39;
+    return dScStage_c::m_instance->curWorldAndLevel == ((0 << 8) | 39);
 }
 
 
