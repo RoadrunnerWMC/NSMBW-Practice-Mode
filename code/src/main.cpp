@@ -101,9 +101,16 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
                 *virtuals_held &= ~VBUTTON_RELOAD_ZONE_HERE;
             }
 
-            if (bitfield & BUTTON_A) {
+            u32 button_to_check_for;
+            if (RiivolutionOptionsFlags & 1) {
+                button_to_check_for = BUTTON_A;
+            } else {
+                button_to_check_for = BUTTON_B;
+            }
+
+            if (bitfield & button_to_check_for) {
                 *virtuals_held |= VBUTTON_CYCLE_POWERUP;
-                *suppression |= BUTTON_A;
+                *suppression |= button_to_check_for;
                 *minus_combo_was_input = true;
             } else {
                 *virtuals_held &= ~VBUTTON_CYCLE_POWERUP;
@@ -145,27 +152,28 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
         } else {
             *virtuals_held &= ~VBUTTON_SAVESTATE_SAVE;
         }
-    }
 
-    if (this_->controllerType == SIDEWAYS) {
-        u32 button_to_check_for;
-        if (RiivolutionOptionsFlags & 1) {
-            button_to_check_for = BUTTON_B;
+        if (this_->controllerType == SIDEWAYS) {
+            u32 button_to_check_for;
+            if (RiivolutionOptionsFlags & 1) {
+                button_to_check_for = BUTTON_B;
+            } else {
+                button_to_check_for = BUTTON_A;
+            }
+
+            if (bitfield & button_to_check_for) {
+                *virtuals_held |= VBUTTON_SAVESTATE_RESTORE;
+                *suppression |= button_to_check_for;
+            } else {
+                *virtuals_held &= ~VBUTTON_SAVESTATE_RESTORE;
+            }
         } else {
-            button_to_check_for = BUTTON_A;
-        }
-        if (bitfield & button_to_check_for) {
-            *virtuals_held |= VBUTTON_SAVESTATE_RESTORE;
-            *suppression |= button_to_check_for;
-        } else {
-            *virtuals_held &= ~VBUTTON_SAVESTATE_RESTORE;
-        }
-    } else {
-        if (bitfield & BUTTON_C) {
-            *virtuals_held |= VBUTTON_SAVESTATE_RESTORE;
-            *suppression |= BUTTON_C;
-        } else {
-            *virtuals_held &= ~VBUTTON_SAVESTATE_RESTORE;
+            if (bitfield & BUTTON_C) {
+                *virtuals_held |= VBUTTON_SAVESTATE_RESTORE;
+                *suppression |= BUTTON_C;
+            } else {
+                *virtuals_held &= ~VBUTTON_SAVESTATE_RESTORE;
+            }
         }
     }
 
