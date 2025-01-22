@@ -68,6 +68,8 @@ bool restore_state(dAcPy_c *player, SavestateLite *state) {
         }
     }
 
+    // TODO: we should save/restore the state of dActorCreateMng_c
+    // instead
     dActorCreateMng_c::m_instance->MapActorInital_next();
 
     return true;
