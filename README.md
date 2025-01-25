@@ -28,6 +28,8 @@ There are currently three control schemes: two for sideways Wii Remote (you can 
 | Reload room (return to original position) | Minus + 1 | Minus + 1 | Minus + B |
 | Reload room (keep current position) | Minus + 2 | Minus + 2 | Minus + A |
 | Cycle powerup | Minus + B | Minus + A | Minus + Z |
+| Toggle invincibility | Minus + D-Pad Up | Minus + D-Pad Up | Minus + Joystick Up |
+| Exit stage | Minus + D-Pad Down | Minus + D-Pad Down | Minus + Joystick Down |
 
 ## Special Thanks
 

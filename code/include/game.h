@@ -425,7 +425,32 @@ public:
 class dInfo_c {
 public:
     static dInfo_c *m_instance;
+    static u32 mGameFlag;
 
     /* 0x000 */ u8 pad[0x008];
     /* 0x008 */ dCyuukan_c cyuukan;
+};
+
+// unofficial function name
+void ReturnToAnotherSceneAfterLevel(u32, u32, u32, u32);
+
+
+class dFader_c {
+public:
+    typedef enum fader_type_e {
+        FADER_TYPE_FADE = 0,
+        FADER_TYPE_CIRCLE_1,
+        FADER_TYPE_BOWSER,
+        FADER_TYPE_WAVY,
+        FADER_TYPE_MARIO_HEAD,
+        FADER_TYPE_CIRCLE_5,
+    } fader_type_e;
+
+    static bool setFader(fader_type_e type);
+};
+
+
+class dScene_c {
+public:
+    static void setNextScene(u16, unsigned long, bool);
 };

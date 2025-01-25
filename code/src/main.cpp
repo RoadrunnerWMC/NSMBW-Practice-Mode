@@ -8,6 +8,7 @@ bool SavedStateValid = false;  // TODO: reset to false when loading into the lev
 SavestateLite SavedState = {0};
 
 
+#define SE_SYS_BACK 122
 #define SE_SYS_INVALID 123
 #define SE_SYS_ROUTE_OK 187
 
@@ -58,10 +59,11 @@ enum VirtualButtons {
     VBUTTON_SAVESTATE_SAVE = 0x1,
     VBUTTON_SAVESTATE_RESTORE = 0x2,
     VBUTTON_CYCLE_POWERUP = 0x4,
-    VBUTTON_RELOAD_ZONE_START = 0x8,
-    VBUTTON_RELOAD_ZONE_HERE = 0x10,
+    VBUTTON_TOGGLE_STAR = 0x08,
+    VBUTTON_RELOAD_ZONE_START = 0x10,
+    VBUTTON_RELOAD_ZONE_HERE = 0x20,
+    VBUTTON_EXIT_STAGE = 0x40,
 };
-
 
 
 u32 TruePrevButtonsHeld[4] = {0};
@@ -116,6 +118,24 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
                 *virtuals_held &= ~VBUTTON_CYCLE_POWERUP;
             }
 
+            // actually means "up" with sideways remote
+            if (bitfield & BUTTON_DPAD_RIGHT) {
+                *virtuals_held |= VBUTTON_TOGGLE_STAR;
+                *suppression |= BUTTON_DPAD_RIGHT;
+                *minus_combo_was_input = true;
+            } else {
+                *virtuals_held &= ~VBUTTON_TOGGLE_STAR;
+            }
+
+            // actually means "down" with sideways remote
+            if (bitfield & BUTTON_DPAD_LEFT) {
+                *virtuals_held |= VBUTTON_EXIT_STAGE;
+                *suppression |= BUTTON_DPAD_LEFT;
+                *minus_combo_was_input = true;
+            } else {
+                *virtuals_held &= ~VBUTTON_EXIT_STAGE;
+            }
+
         } else {
             if (bitfield & BUTTON_B) {
                 *virtuals_held |= VBUTTON_RELOAD_ZONE_START;
@@ -139,6 +159,22 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
                 *minus_combo_was_input = true;
             } else {
                 *virtuals_held &= ~VBUTTON_CYCLE_POWERUP;
+            }
+
+            if (bitfield & BUTTON_NUNCHUK_UP) {
+                *virtuals_held |= VBUTTON_TOGGLE_STAR;
+                *suppression |= BUTTON_NUNCHUK_UP;
+                *minus_combo_was_input = true;
+            } else {
+                *virtuals_held &= ~VBUTTON_TOGGLE_STAR;
+            }
+
+            if (bitfield & BUTTON_NUNCHUK_DOWN) {
+                *virtuals_held |= VBUTTON_EXIT_STAGE;
+                *suppression |= BUTTON_NUNCHUK_DOWN;
+                *minus_combo_was_input = true;
+            } else {
+                *virtuals_held &= ~VBUTTON_EXIT_STAGE;
             }
         }
     } else {
@@ -233,6 +269,19 @@ bool is_title_screen_stage() {
 }
 
 
+void exit_stage() {
+    // copied from PauseManager_c::ConfirmationSelectDecisionWait()
+    if ((dInfo_c::mGameFlag & 0x10) == 0) {
+        ReturnToAnotherSceneAfterLevel(3, 0, 2, 5);
+    } else {
+        // this goes back to the coin-battle/free-for-all menu -- I
+        // doubt anyone will need this, but might as well just in case
+        dFader_c::setFader(dFader_c::FADER_TYPE_CIRCLE_5);
+        dScene_c::setNextScene(11, 0, false);
+    }
+}
+
+
 extern "C" int daPlBase_c_execute(daPlBase_c *this_);
 
 int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
@@ -257,7 +306,10 @@ int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
 
         if (virtual_buttons_pressed & VBUTTON_CYCLE_POWERUP) {
             cycle_powerup(this_);
-            // or: toggle_star(this_);
+        }
+
+        if (virtual_buttons_pressed & VBUTTON_TOGGLE_STAR) {
+            toggle_star(this_);
         }
 
         if (virtual_buttons_pressed & VBUTTON_RELOAD_ZONE_START) {
@@ -266,6 +318,11 @@ int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
 
         if (virtual_buttons_pressed & VBUTTON_RELOAD_ZONE_HERE) {
             trigger_zone_reload(this_, true);
+        }
+
+        if (virtual_buttons_pressed & VBUTTON_EXIT_STAGE) {
+            this_->playSound(SE_SYS_BACK, 1);
+            exit_stage();
         }
     }
 
