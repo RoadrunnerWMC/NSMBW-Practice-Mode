@@ -1,5 +1,5 @@
 #include "game.h"
-#include "zone_reload.h"
+#include "zone_control.h"
 
 
 #define FAKE_ENTRANCE_ID 254
@@ -23,9 +23,16 @@ struct ZoneState {
     PlayerState playerStates[4];
 };
 
-ZoneState initial_zone_state;
+enum RestorationType {
+    RESTORATION_TYPE_CURRENT_STAGE,
+    RESTORATION_TYPE_CURRENT_ZONE,
+};
+
+ZoneState initial_state_of_current_stage;
+ZoneState initial_state_of_current_zone;
 bool is_restoring_stage = false;
 bool is_restoring_players = false;
+RestorationType current_restoration_type;
 
 
 u8 curEntranceNonFake = 0;
@@ -45,26 +52,26 @@ fake:
 }
 
 
-void save_initial_zone_state() {
-    initial_zone_state.numLivePlayers = daPyMng_c::mNum;
-    initial_zone_state.activePlayersBitfield = daPyMng_c::mActPlayerInfo;
-    initial_zone_state.playerStates[0].lives = daPyMng_c::mRest[0];
-    initial_zone_state.playerStates[1].lives = daPyMng_c::mRest[1];
-    initial_zone_state.playerStates[2].lives = daPyMng_c::mRest[2];
-    initial_zone_state.playerStates[3].lives = daPyMng_c::mRest[3];
-    initial_zone_state.playerStates[0].coins = daPyMng_c::mCoin[0];
-    initial_zone_state.playerStates[1].coins = daPyMng_c::mCoin[1];
-    initial_zone_state.playerStates[2].coins = daPyMng_c::mCoin[2];
-    initial_zone_state.playerStates[3].coins = daPyMng_c::mCoin[3];
-    initial_zone_state.score = daPyMng_c::mScore;
-    initial_zone_state.timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
-    initial_zone_state.starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
-    initial_zone_state.starCoinCollectionStates[1] = dScStage_c::mCollectionCoin[1];
-    initial_zone_state.starCoinCollectionStates[2] = dScStage_c::mCollectionCoin[2];
+void save_zone_state(ZoneState *state) {
+    state->numLivePlayers = daPyMng_c::mNum;
+    state->activePlayersBitfield = daPyMng_c::mActPlayerInfo;
+    state->playerStates[0].lives = daPyMng_c::mRest[0];
+    state->playerStates[1].lives = daPyMng_c::mRest[1];
+    state->playerStates[2].lives = daPyMng_c::mRest[2];
+    state->playerStates[3].lives = daPyMng_c::mRest[3];
+    state->playerStates[0].coins = daPyMng_c::mCoin[0];
+    state->playerStates[1].coins = daPyMng_c::mCoin[1];
+    state->playerStates[2].coins = daPyMng_c::mCoin[2];
+    state->playerStates[3].coins = daPyMng_c::mCoin[3];
+    state->score = daPyMng_c::mScore;
+    state->timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
+    state->starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
+    state->starCoinCollectionStates[1] = dScStage_c::mCollectionCoin[1];
+    state->starCoinCollectionStates[2] = dScStage_c::mCollectionCoin[2];
 }
 
 
-void restore_initial_zone_state() {
+void restore_zone_state(ZoneState *state) {
     // Reset stored sprite data in dActorCreateMng_c
     // (resets spawn status for various types of enemies, mainly)
     // TODO: maybe just reset this for only the current zone, instead of
@@ -91,9 +98,9 @@ void restore_initial_zone_state() {
     // the whole level?
 
     // Reset all star coins to their original collection states
-    dScStage_c::mCollectionCoin[0] = initial_zone_state.starCoinCollectionStates[0];
-    dScStage_c::mCollectionCoin[1] = initial_zone_state.starCoinCollectionStates[1];
-    dScStage_c::mCollectionCoin[2] = initial_zone_state.starCoinCollectionStates[2];
+    dScStage_c::mCollectionCoin[0] = state->starCoinCollectionStates[0];
+    dScStage_c::mCollectionCoin[1] = state->starCoinCollectionStates[1];
+    dScStage_c::mCollectionCoin[2] = state->starCoinCollectionStates[2];
 
     // If a checkpoint is collected, clear it
     // (TODO: should really reset it to whatever it was at level load,
@@ -101,20 +108,20 @@ void restore_initial_zone_state() {
     dInfo_c::m_instance->cyuukan.clear();
 
     // Reset daPyMng_c fields
-    daPyMng_c::mNum = initial_zone_state.numLivePlayers;
-    daPyMng_c::mActPlayerInfo = initial_zone_state.activePlayersBitfield;
-    daPyMng_c::mRest[0] = initial_zone_state.playerStates[0].lives;
-    daPyMng_c::mRest[1] = initial_zone_state.playerStates[1].lives;
-    daPyMng_c::mRest[2] = initial_zone_state.playerStates[2].lives;
-    daPyMng_c::mRest[3] = initial_zone_state.playerStates[3].lives;
-    daPyMng_c::mCoin[0] = initial_zone_state.playerStates[0].coins;
-    daPyMng_c::mCoin[1] = initial_zone_state.playerStates[1].coins;
-    daPyMng_c::mCoin[2] = initial_zone_state.playerStates[2].coins;
-    daPyMng_c::mCoin[3] = initial_zone_state.playerStates[3].coins;
-    daPyMng_c::mScore = initial_zone_state.score;
+    daPyMng_c::mNum = state->numLivePlayers;
+    daPyMng_c::mActPlayerInfo = state->activePlayersBitfield;
+    daPyMng_c::mRest[0] = state->playerStates[0].lives;
+    daPyMng_c::mRest[1] = state->playerStates[1].lives;
+    daPyMng_c::mRest[2] = state->playerStates[2].lives;
+    daPyMng_c::mRest[3] = state->playerStates[3].lives;
+    daPyMng_c::mCoin[0] = state->playerStates[0].coins;
+    daPyMng_c::mCoin[1] = state->playerStates[1].coins;
+    daPyMng_c::mCoin[2] = state->playerStates[2].coins;
+    daPyMng_c::mCoin[3] = state->playerStates[3].coins;
+    daPyMng_c::mScore = state->score;
 
     // Reset the timer time
-    dStageTimer_c::m_instance->preciseTime = initial_zone_state.timerPreciseTime;
+    dStageTimer_c::m_instance->preciseTime = state->timerPreciseTime;
 
     // Reset dActorCreateMng_c (it gets disabled when the goal pole is
     // touched, so we'd like to re-enable it)
@@ -122,27 +129,27 @@ void restore_initial_zone_state() {
 }
 
 
-void save_initial_zone_state_players() {
+void save_zone_state_players(ZoneState *state) {
     for (int i = 0; i < 4; i++) {
         dAcPy_c *player = daPyMng_c::getPlayer(i);
         if (player == NULL)
             continue;
 
-        initial_zone_state.playerStates[i].powerup = player->powerup;
-        initial_zone_state.playerStates[i].starTimer = player->starTimer;
+        state->playerStates[i].powerup = player->powerup;
+        state->playerStates[i].starTimer = player->starTimer;
     }
 }
 
 
-void restore_initial_zone_state_players() {
+void restore_zone_state_players(ZoneState *state) {
     for (int i = 0; i < 4; i++) {
         dAcPy_c *player = daPyMng_c::getPlayer(i);
         if (player == NULL)
             continue;
 
-        player->setPowerupAlt((Powerup)(initial_zone_state.playerStates[i].powerup));
+        player->setPowerupAlt((Powerup)(state->playerStates[i].powerup));
 
-        u32 starTimer = initial_zone_state.playerStates[i].starTimer;
+        u32 starTimer = state->playerStates[i].starTimer;
         if (starTimer == 0) {
             player->vtable->endStar(player);
         } else {
@@ -155,9 +162,18 @@ void restore_initial_zone_state_players() {
 // Hook at the end of dScStage_c::create()
 kmBranchDefCpp(0x80924e58, NULL, u32, ) {
     if (!is_restoring_stage) {
-        save_initial_zone_state();
+        if (dScStage_c::getCourseIn()) {
+            save_zone_state(&initial_state_of_current_stage);
+        }
+
+        save_zone_state(&initial_state_of_current_zone);
     } else {
-        restore_initial_zone_state();
+        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
+            restore_zone_state(&initial_state_of_current_zone);
+        } else {
+            restore_zone_state(&initial_state_of_current_stage);
+        }
+
         is_restoring_stage = false;
     }
     return 1;
@@ -168,13 +184,53 @@ kmBranchDefCpp(0x80924e58, NULL, u32, ) {
 // dScStage_c::create() finishes executing)
 kmBranchDefCpp(0x8005f4cc, NULL, void, ) {
     if (!is_restoring_players) {
-        save_initial_zone_state_players();
+        if (dScStage_c::getCourseIn()) {
+            save_zone_state_players(&initial_state_of_current_stage);
+        }
+
+        save_zone_state_players(&initial_state_of_current_zone);
     } else {
-        restore_initial_zone_state_players();
+        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
+            restore_zone_state_players(&initial_state_of_current_zone);
+        } else {
+            restore_zone_state_players(&initial_state_of_current_stage);
+        }
+
         is_restoring_players = false;
     }
 }
 
+
+void trigger_stage_reload() {
+    // Trigger a wipe
+    dFader_c::setFader(dFader_c::FADER_TYPE_CIRCLE_5);
+
+    // Force a background music fade-out
+    // (note: "0" = the currently playing music, "1" = no music, and
+    // higher values = specific music IDs)
+    dAudio::hashname_a2bd17ff_6bcc38cc(1);
+
+    // The game normally uses this function to reset some game state
+    // upon death, including the spawn position if loading from
+    // checkpoint
+    dScStage_c::m_instance->restoreOldPlayerInfo();
+
+    // Trigger the actual stage reload
+    u8 world = dScStage_c::m_instance->curWorld;
+    u8 level = dScStage_c::m_instance->curLevel;
+    dInfo_c::m_instance->startGame((dInfo_c::StartGameInfo_s) {
+        /* replay_duration */ 0,
+        /* hint_movie_type */ 0,
+        /* entrance */ 0xff,  // (default entrance)
+        /* area */ 0,
+        /* is_replay */ false,
+        /* screen_type */ dInfo_c::SCREEN_TYPE_NORMAL,
+        /* world_1 */ world,
+        /* level_1 */ level,
+        /* world_2 */ world,
+        /* level_2 */ level
+    });
+}
 
 
 void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
@@ -192,6 +248,7 @@ void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
 
     is_restoring_stage = true;
     is_restoring_players = true;
+    current_restoration_type = RESTORATION_TYPE_CURRENT_ZONE;
 }
 
 

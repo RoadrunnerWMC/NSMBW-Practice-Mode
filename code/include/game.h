@@ -290,6 +290,9 @@ public:
     static dCamera_c *m_camera[1];
     static dScStage_c *m_instance;
     static u32 mCollectionCoin[3];
+
+    static bool getCourseIn();
+    void restoreOldPlayerInfo();
 };
 
 
@@ -424,6 +427,36 @@ public:
 
 class dInfo_c {
 public:
+    typedef enum hint_movie_type_e {
+        HINT_MOVIE_TYPE_SUPER_SKILLS = 0,
+        HINT_MOVIE_TYPE_1UP,
+        HINT_MOVIE_TYPE_STAR_COIN,
+        HINT_MOVIE_TYPE_SECRET_EXIT,
+    } hint_movie_type_e;
+
+    typedef enum screen_type_e {
+        SCREEN_TYPE_NORMAL = 0,
+        SCREEN_TYPE_SUPER_GUIDE,
+        SCREEN_TYPE_TITLE,
+        SCREEN_TYPE_TITLE_REPLAY,
+        SCREEN_TYPE_HINT_MOVIE,
+    } screen_type_e;
+
+    typedef struct StartGameInfo_s {
+        /* 0x00 */ u32 replay_duration;
+        /* 0x04 */ u8 hint_movie_type;  // hint_movie_type_e
+        /* 0x05 */ u8 entrance;
+        /* 0x06 */ u8 area;
+        /* 0x07 */ bool is_replay;
+        /* 0x08 */ u32 screen_type;  // screen_type_e
+        /* 0x0c */ u8 world_1;
+        /* 0x0d */ u8 level_1;
+        /* 0x0e */ u8 world_2;
+        /* 0x0f */ u8 level_2;
+    } StartGameInfo_s;
+
+    void startGame(const dInfo_c::StartGameInfo_s&);
+
     static dInfo_c *m_instance;
     static u32 mGameFlag;
 
@@ -453,4 +486,10 @@ public:
 class dScene_c {
 public:
     static void setNextScene(u16, unsigned long, bool);
+};
+
+
+class dAudio {
+public:
+    static void hashname_a2bd17ff_6bcc38cc(s32);
 };

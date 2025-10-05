@@ -14,7 +14,7 @@ NSMBW Practice Mode is a Riivolution patch, so install the Homebrew Channel and 
 
 - In-game timer with two decimal places ([see note](#note-regarding-the-timer))
 - Save / reload state *(EARLY IN DEVELOPMENT: currently only works within the same room, and only a few things are saved/restored)*
-- Reload the current room
+- Reload the current stage or room
 - Switch to any powerup
 
 ## Controls
@@ -29,7 +29,7 @@ There are currently three control schemes: two for sideways Wii Remote (you can 
 | Reload room (keep current position) | Minus + 2 | Minus + 2 | Minus + A |
 | Cycle powerup | Minus + B | Minus + A | Minus + Z |
 | Toggle invincibility | Minus + D-Pad Up | Minus + D-Pad Up | Minus + Joystick Up |
-| Exit stage | Minus + D-Pad Down | Minus + D-Pad Down | Minus + Joystick Down |
+| Reload stage | Minus + D-Pad Down | Minus + D-Pad Down | Minus + Joystick Down |
 
 ## Special Thanks
 

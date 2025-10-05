@@ -1,7 +1,7 @@
 #include "game.h"
 #include "savestate_lite.h"
 #include "powerup.h"
-#include "zone_reload.h"
+#include "zone_control.h"
 
 
 bool SavedStateValid = false;  // TODO: reset to false when loading into the level
@@ -62,7 +62,7 @@ enum VirtualButtons {
     VBUTTON_TOGGLE_STAR = 0x08,
     VBUTTON_RELOAD_ZONE_START = 0x10,
     VBUTTON_RELOAD_ZONE_HERE = 0x20,
-    VBUTTON_EXIT_STAGE = 0x40,
+    VBUTTON_RELOAD_STAGE = 0x40,
 };
 
 
@@ -129,11 +129,11 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
 
             // actually means "down" with sideways remote
             if (bitfield & BUTTON_DPAD_LEFT) {
-                *virtuals_held |= VBUTTON_EXIT_STAGE;
+                *virtuals_held |= VBUTTON_RELOAD_STAGE;
                 *suppression |= BUTTON_DPAD_LEFT;
                 *minus_combo_was_input = true;
             } else {
-                *virtuals_held &= ~VBUTTON_EXIT_STAGE;
+                *virtuals_held &= ~VBUTTON_RELOAD_STAGE;
             }
 
         } else {
@@ -170,11 +170,11 @@ u32 dGameKeyCore_c_intercept_input(dGameKeyCore_c *this_, u32 bitfield) {
             }
 
             if (bitfield & BUTTON_NUNCHUK_DOWN) {
-                *virtuals_held |= VBUTTON_EXIT_STAGE;
+                *virtuals_held |= VBUTTON_RELOAD_STAGE;
                 *suppression |= BUTTON_NUNCHUK_DOWN;
                 *minus_combo_was_input = true;
             } else {
-                *virtuals_held &= ~VBUTTON_EXIT_STAGE;
+                *virtuals_held &= ~VBUTTON_RELOAD_STAGE;
             }
         }
     } else {
@@ -269,19 +269,6 @@ bool is_title_screen_stage() {
 }
 
 
-void exit_stage() {
-    // copied from PauseManager_c::ConfirmationSelectDecisionWait()
-    if ((dInfo_c::mGameFlag & 0x10) == 0) {
-        ReturnToAnotherSceneAfterLevel(3, 0, 2, 5);
-    } else {
-        // this goes back to the coin-battle/free-for-all menu -- I
-        // doubt anyone will need this, but might as well just in case
-        dFader_c::setFader(dFader_c::FADER_TYPE_CIRCLE_5);
-        dScene_c::setNextScene(11, 0, false);
-    }
-}
-
-
 extern "C" int daPlBase_c_execute(daPlBase_c *this_);
 
 int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
@@ -320,9 +307,9 @@ int dAcPy_c_execute_wrapper(dAcPy_c *this_) {
             trigger_zone_reload(this_, true);
         }
 
-        if (virtual_buttons_pressed & VBUTTON_EXIT_STAGE) {
+        if (virtual_buttons_pressed & VBUTTON_RELOAD_STAGE) {
             this_->playSound(SE_SYS_BACK, 1);
-            exit_stage();
+            trigger_stage_reload();
         }
     }
 
