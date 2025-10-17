@@ -46,3 +46,18 @@ This leads to a problem when adding fractional decimal points to the timer: what
 To solve this, this mod effectively\* adds 0.99 seconds to the displayed time, which ensures that the integer part will always match the original timer value exactly. This makes the behavior around endpoints a bit odd (the timer starts at a number like "500.99", the "hurry up" music plays at "100.99", and Mario dies at "0.99"), but it was still considered the best option.
 
 *\*The actual calculation is a bit more complicated, to avoid rounding errors.*
+
+## Building
+
+1. Install [Python 3](https://www.python.org/), [Ninja](https://ninja-build.org/), and [Wine](https://www.winehq.org/) (if not on Windows). Also download a build of [Kamek](https://github.com/Treeki/Kamek), and the right version of CodeWarrior (see the Kamek readme for more details).
+2. In the `code` folder, run `python3 configure.py --kamek=<path to Kamek binary> --kstdlib=<path to k_stdlib folder> --cw=<path to mwcceppc.exe>`.
+3. In the same folder, run `ninja`. This will build the code files and put them in `code/bin`.
+4. Copy them into `sd/nsmbw_practice_mode/Code`. Alternatively, set up symlinks from the Code folder to the bin folder, so it'll always reflect the latest versions whenever you rebuild.
+
+The `sd` folder is now a working Riivolution mod you can test in Dolphin or on hardware.
+
+To create a release:
+
+1. (Optional) Install [advzip](https://github.com/amadvance/advancecomp). If available, this is used to perform better compression on the zip.
+2. Run `./create_release.sh`.
+3. Rename the newly created `NEW_RELEASE.zip` to a more proper filename, like `nsmbw_practice_mode_0.6.0.zip`.
