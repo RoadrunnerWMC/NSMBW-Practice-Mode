@@ -119,10 +119,6 @@ void save_zone_state_late(ZoneState *state) {
 }
 
 
-// TOOD/FIXME: if you save without Yoshi, then reset while on Yoshi, the
-// bongos keep playing
-
-
 void restore_dScStage_c(STATE_dScStage_c *state) {
     dScStage_c::mCollectionCoin[0] = state->mCollectionCoin[0];
     dScStage_c::mCollectionCoin[1] = state->mCollectionCoin[1];
@@ -135,16 +131,30 @@ void restore_daPyMng_c(STATE_daPyMng_c *state) {
     daPyMng_c::mActPlayerInfo = state->mActPlayerInfo;
     daPyMng_c::mScore = state->mScore;
 
+    bool enable_yoshi_drums = false;
+
     for (int i = 0; i < 4; i++) {
         daPyMng_c::mRest[i] = state->mRest[i];
         daPyMng_c::mCoin[i] = state->mCoin[i];
         daPyMng_c::m_yoshiFruit[i] = state->m_yoshiFruit[i];
         daPyMng_c::mPlayerMode[i] = state->mPlayerMode[i];
         daPyMng_c::mCreateItem[i] = state->mCreateItem[i];
+        if (state->mCreateItem[i] == 2) {  // player is riding Yoshi
+            enable_yoshi_drums = true;
+        }
         daPyMng_c::m_star_time[i] = state->m_star_time[i];
         daPyMng_c::m_star_count[i] = state->m_star_count[i];
         daPyMng_c::mPlayerType[i] = state->mPlayerType[i];
         daPyMng_c::m_yoshiColor[i] = state->m_yoshiColor[i];
+    }
+
+    // If the player resets from a non-Yoshi-riding state to a
+    // Yoshi-riding state, the game is smart enough to start the Yoshi
+    // drums automatically. But it's not smart enough to automatically
+    // *stop* them in the opposite case, for some reason, so we have to
+    // do it manually.
+    if (!enable_yoshi_drums) {
+        daPyMng_c::stopYoshiBGM();
     }
 }
 

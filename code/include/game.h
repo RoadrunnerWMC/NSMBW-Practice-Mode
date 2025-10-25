@@ -173,6 +173,7 @@ public:
     /* 80429fa0 */ static u32 mScore;
 
     static dAcPy_c *getPlayer(int num);
+    static void stopYoshiBGM();
 };
 
 
