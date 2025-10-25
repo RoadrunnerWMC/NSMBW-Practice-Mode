@@ -81,6 +81,14 @@ public:
 };
 
 
+class dRc_c {
+public:
+    /* 0x00 */ u8 pad[0x34];
+
+    /* 800d9bb0 */ void clrLink();
+};
+
+
 class daPlBase_c;
 
 
@@ -118,24 +126,28 @@ public:
     /* 0x118 */ f32 accelFall;
     /* 0x11c */ f32 accelX;
 
-    /* 0x120 */ u8 pad3[0x228];
+    /* 0x120 */ u8 pad3[0x1bc];
+
+    /* 0x2dc */ dRc_c rCollDetector;
+
+    /* 0x310 */ u8 pad4[0x38];
 
     /* 0x348 */ u8 direction;
 
-    /* 0x349 */ u8 pad4[0xb5b];
+    /* 0x349 */ u8 pad5[0xb5b];
 
     /* 0xea4 */ dAcPyKey_c input;
 
-    /* 0x1008 */ u8 pad5[0x6c];
+    /* 0x1008 */ u8 pad6[0x6c];
 
     /* 0x1074 */ u32 flashTimer;
 
-    /* 0x1078 */ u8 pad6[0x18];
+    /* 0x1078 */ u8 pad7[0x18];
 
     /* 0x1090 */ int powerup;
 
     // technically in dAcPy_c probably
-    /* 0x1094 */ u8 pad7[0x498];
+    /* 0x1094 */ u8 pad8[0x498];
     /* 0x152c */ Vec camPos;
 
     /* 80057e70 */ void playSound(unsigned int id, long unk);  // unofficial method name

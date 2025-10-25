@@ -57,6 +57,10 @@ bool restore_state(dAcPy_c *player, SavestateLite *state) {
     // if the player is still flashing from recent damage, cancel that
     player->flashTimer = 0;
 
+    // if the player is currently riding a moving platform of some kind,
+    // cancel that, or else they'll just teleport back there next frame
+    player->rCollDetector.clrLink();
+
     memcpy(dBgParameter_c::ms_Instance_p, &state->bgParam, sizeof(dBgParameter_c));
 
     dStageTimer_c::m_instance->preciseTime = state->timerPreciseTime;
