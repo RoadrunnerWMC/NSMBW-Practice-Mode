@@ -22,6 +22,9 @@ enum ControlStyle {
 };
 
 
+#define PF_RIDES_YOSHI 75
+
+
 class dAcPyKey_c {
 public:
     // For the "held"/"pressed" fields:
@@ -79,7 +82,9 @@ class daPlBase_c;
 
 class daPlBase_c_vtable {
 public:
-    /* 0x000 */ u8 pad1[0x3d4];
+    /* 0x000 */ u8 pad1[0x124];
+    /* 0x124 */ void (*changeNextScene)(daPlBase_c *this_, int unk);
+    /* 0x128 */ u8 pad2[0x2ac];
     /* 0x3d4 */ u32 (*isStar)(daPlBase_c *this_);
     /* 0x3d8 */ void (*startStar)(daPlBase_c *this_, int behavior, int timer);
     /* 0x3dc */ void (*endStar)(daPlBase_c *this_);
@@ -90,6 +95,7 @@ class daPlBase_c {
 public:
     void useNextGotoBlock(u32 exitID, u32 delay, u32 transition);  // unofficial method name
     void playSound(unsigned int id, long unk);  // unofficial method name
+    bool isStatus(int flags);
 
     /* 0x000 */ u8 pad1[0x60];
 
@@ -116,38 +122,55 @@ public:
 
     /* 0x348 */ u8 direction;
 
-    /* 0x349 */ u8 pad4[0xb5b];
+    /* 0x349 */ u8 pad4[0x44];
+
+    /* 0x38d */ u8 m_plrNo;
+
+    /* 0x38e */ u8 pad5[0xb16];
 
     /* 0xea4 */ dAcPyKey_c input;
 
-    /* 0x1008 */ u8 pad5[0x68];
+    /* 0x1008 */ u8 pad6[0x68];
 
     /* 0x1070 */ u32 starTimer;
     /* 0x1074 */ u32 flashTimer;
 
-    /* 0x1078 */ u8 pad6[0x18];
+    /* 0x1078 */ u8 pad7[0x18];
 
     /* 0x1090 */ int powerup;
 
     // technically in dAcPy_c probably
-    /* 0x1094 */ u8 pad7[0x498];
+    /* 0x1094 */ u8 pad8[0x498];
     /* 0x152c */ Vec camPos;
+};
+
+
+class daYoshi_c : public daPlBase_c {
 };
 
 
 class dAcPy_c : public daPlBase_c {
 public:
     void setPowerupAlt(Powerup powerup);  // unofficial method name
+    daYoshi_c *getRideYoshi();
+    void setSceneChangeInfo();
 };
 
 
 class daPyMng_c {
 public:
-    static u32 mRest[4];
-    static u32 mCoin[4];
-    static u32 mNum;
-    static u32 mScore;
-    static u32 mActPlayerInfo;
+    /* 80355140 */ static u32 m_yoshiFruit[4];
+    /* 80355160 */ static u32 mPlayerType[4];
+    /* 80355170 */ static u32 mPlayerMode[4];
+    /* 80355180 */ static u32 mCreateItem[4];
+    /* 80355190 */ static u32 mRest[4];
+    /* 803551a0 */ static u32 mCoin[4];
+    /* 80429f80 */ static u32 mNum;
+    /* 80429f88 */ static u32 mActPlayerInfo;
+    /* 80429f8c */ static u8 m_yoshiColor[4];
+    /* 80429f90 */ static u16 m_star_time[4];
+    /* 80429f98 */ static u16 m_star_count[4];
+    /* 80429fa0 */ static u32 mScore;
 
     static dAcPy_c *getPlayer(int num);
 };
@@ -301,6 +324,9 @@ public:
     void initGoto(u8, u8, u32);
 
     static dNext_c *m_instance;
+
+    /* 0x00 */ u8 pad[0x1c];
+    /* 0x1c */ s16 m_timer;
 };
 
 class dActorCreateMng_c {

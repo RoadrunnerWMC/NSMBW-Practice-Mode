@@ -7,20 +7,37 @@
 NextGoto FakeEntrance = {0};
 bool ForceFacingLeft = false;
 
-struct PlayerState {
-    u32 lives;
-    u32 coins;
-    int powerup;
-    int starTimer;
+struct STATE_dScStage_c {
+    u32 mCollectionCoin[3];  // star coin collection states
+};
+
+struct STATE_daPyMng_c {
+    // (Arrays of length 4 are per-player)
+    u32 m_yoshiFruit[4];  // number of Yoshi fruits collected (0-4)
+    u32 mPlayerType[4];   // which character this player is playing as
+    u32 mPlayerMode[4];   // powerup
+    u32 mCreateItem[4];   // flags indicating whether the player is in a
+                          // bubble and whether they're riding Yoshi
+    u32 mRest[4];         // number of lives
+    u32 mCoin[4];         // number of coins (0-99)
+    u32 mNum;             // number of live players
+    u32 mActPlayerInfo;   // bitfield of active players
+    u8 m_yoshiColor[4];
+    u16 m_star_time[4];   // amount of invincibility time left
+    u16 m_star_count[4];  // number of enemies player has killed since
+                          // becoming invincible (for determining points
+                          // and 1UPs)
+    u32 mScore;
+};
+
+struct STATE_dStageTimer_c {
+    u32 preciseTime;
 };
 
 struct ZoneState {
-    u32 numLivePlayers;
-    u32 activePlayersBitfield;
-    u32 score;
-    u32 timerPreciseTime;
-    u32 starCoinCollectionStates[3];
-    PlayerState playerStates[4];
+    STATE_dScStage_c dScStage_c;
+    STATE_daPyMng_c daPyMng_c;
+    STATE_dStageTimer_c dStageTimer_c;
 };
 
 enum RestorationType {
@@ -52,26 +69,100 @@ fake:
 }
 
 
-void save_zone_state(ZoneState *state) {
-    state->numLivePlayers = daPyMng_c::mNum;
-    state->activePlayersBitfield = daPyMng_c::mActPlayerInfo;
-    state->playerStates[0].lives = daPyMng_c::mRest[0];
-    state->playerStates[1].lives = daPyMng_c::mRest[1];
-    state->playerStates[2].lives = daPyMng_c::mRest[2];
-    state->playerStates[3].lives = daPyMng_c::mRest[3];
-    state->playerStates[0].coins = daPyMng_c::mCoin[0];
-    state->playerStates[1].coins = daPyMng_c::mCoin[1];
-    state->playerStates[2].coins = daPyMng_c::mCoin[2];
-    state->playerStates[3].coins = daPyMng_c::mCoin[3];
-    state->score = daPyMng_c::mScore;
-    state->timerPreciseTime = dStageTimer_c::m_instance->preciseTime;
-    state->starCoinCollectionStates[0] = dScStage_c::mCollectionCoin[0];
-    state->starCoinCollectionStates[1] = dScStage_c::mCollectionCoin[1];
-    state->starCoinCollectionStates[2] = dScStage_c::mCollectionCoin[2];
+void save_dScStage_c(STATE_dScStage_c *state) {
+    state->mCollectionCoin[0] = dScStage_c::mCollectionCoin[0];
+    state->mCollectionCoin[1] = dScStage_c::mCollectionCoin[1];
+    state->mCollectionCoin[2] = dScStage_c::mCollectionCoin[2];
 }
 
 
-void restore_zone_state(ZoneState *state) {
+void save_daPyMng_c(STATE_daPyMng_c *state) {
+    // Have each player update its relevant fields first
+    for (int i = 0; i < 4; i++) {
+        dAcPy_c *player = daPyMng_c::getPlayer(i);
+        if (player != NULL) {
+            player->setSceneChangeInfo();
+        }
+    }
+
+    state->mNum = daPyMng_c::mNum;
+    state->mActPlayerInfo = daPyMng_c::mActPlayerInfo;
+    state->mScore = daPyMng_c::mScore;
+
+    for (int i = 0; i < 4; i++) {
+        state->mRest[i] = daPyMng_c::mRest[i];
+        state->mCoin[i] = daPyMng_c::mCoin[i];
+        state->m_yoshiFruit[i] = daPyMng_c::m_yoshiFruit[i];
+        state->mPlayerMode[i] = daPyMng_c::mPlayerMode[i];
+        state->mCreateItem[i] = daPyMng_c::mCreateItem[i];
+        state->m_star_time[i] = daPyMng_c::m_star_time[i];
+        state->m_star_count[i] = daPyMng_c::m_star_count[i];
+        state->mPlayerType[i] = daPyMng_c::mPlayerType[i];
+        state->m_yoshiColor[i] = daPyMng_c::m_yoshiColor[i];
+    }
+}
+
+
+void save_dStageTimer_c(STATE_dStageTimer_c *state) {
+    state->preciseTime = dStageTimer_c::m_instance->preciseTime;
+}
+
+
+void save_zone_state_early(ZoneState *state) {
+    save_dScStage_c(&state->dScStage_c);
+    save_daPyMng_c(&state->daPyMng_c);
+}
+
+
+void save_zone_state_late(ZoneState *state) {
+    save_dStageTimer_c(&state->dStageTimer_c);
+}
+
+
+// TOOD/FIXME: if you save without Yoshi, then reset while on Yoshi, the
+// bongos keep playing
+
+
+void restore_dScStage_c(STATE_dScStage_c *state) {
+    dScStage_c::mCollectionCoin[0] = state->mCollectionCoin[0];
+    dScStage_c::mCollectionCoin[1] = state->mCollectionCoin[1];
+    dScStage_c::mCollectionCoin[2] = state->mCollectionCoin[2];
+}
+
+
+void restore_daPyMng_c(STATE_daPyMng_c *state) {
+    daPyMng_c::mNum = state->mNum;
+    daPyMng_c::mActPlayerInfo = state->mActPlayerInfo;
+    daPyMng_c::mScore = state->mScore;
+
+    for (int i = 0; i < 4; i++) {
+        daPyMng_c::mRest[i] = state->mRest[i];
+        daPyMng_c::mCoin[i] = state->mCoin[i];
+        daPyMng_c::m_yoshiFruit[i] = state->m_yoshiFruit[i];
+        daPyMng_c::mPlayerMode[i] = state->mPlayerMode[i];
+        daPyMng_c::mCreateItem[i] = state->mCreateItem[i];
+        daPyMng_c::m_star_time[i] = state->m_star_time[i];
+        daPyMng_c::m_star_count[i] = state->m_star_count[i];
+        daPyMng_c::mPlayerType[i] = state->mPlayerType[i];
+        daPyMng_c::m_yoshiColor[i] = state->m_yoshiColor[i];
+    }
+}
+
+
+void restore_dCyuukan_c() {
+    // If a checkpoint is collected, clear it
+    // (TODO: should really reset it to whatever it was at level load,
+    // but it seems calling cyuukan->courseIN() doesn't do that)
+    dInfo_c::m_instance->cyuukan.clear();
+}
+
+
+void restore_dStageTimer_c(STATE_dStageTimer_c *state) {
+    dStageTimer_c::m_instance->preciseTime = state->preciseTime;
+}
+
+
+void restore_dActorCreateMng_c() {
     // Reset stored sprite data in dActorCreateMng_c
     // (resets spawn status for various types of enemies, mainly)
     // TODO: maybe just reset this for only the current zone, instead of
@@ -80,6 +171,13 @@ void restore_zone_state(ZoneState *state) {
     // efficiency, I just clear both of them with one call
     memset(&dActorCreateMng_c::m_instance->storedShorts, 0, 2000 + 1000);
 
+    // Reset dActorCreateMng_c itself (it gets disabled when the goal
+    // pole is touched, so we'd like to re-enable it)
+    dActorCreateMng_c::m_instance->ActorCreateInfoClear();
+}
+
+
+void restore_dBgParameter_c() {
     // Reset the bitfield arrays in dBgParameter_c
     // (resets spawn status for various types of coins and blocks)
     for (int i = 0; i < 12; i++) {
@@ -89,119 +187,87 @@ void restore_zone_state(ZoneState *state) {
     // is reloaded
     // TODO: maybe just reset this for only the current zone, instead of
     // the whole level?
+}
 
+
+void restore_dFlagCtrl_c() {
     // Reset dFlagCtrl_c
     // (resets spawn status for star coins, red rings, roulette blocks,
     // etc.)
     dFlagCtrl_c::m_instance->clearAllFlagData();
     // TODO: maybe just reset this for only the current zone, instead of
     // the whole level?
-
-    // Reset all star coins to their original collection states
-    dScStage_c::mCollectionCoin[0] = state->starCoinCollectionStates[0];
-    dScStage_c::mCollectionCoin[1] = state->starCoinCollectionStates[1];
-    dScStage_c::mCollectionCoin[2] = state->starCoinCollectionStates[2];
-
-    // If a checkpoint is collected, clear it
-    // (TODO: should really reset it to whatever it was at level load,
-    // but it seems calling cyuukan->courseIN() doesn't do that)
-    dInfo_c::m_instance->cyuukan.clear();
-
-    // Reset daPyMng_c fields
-    daPyMng_c::mNum = state->numLivePlayers;
-    daPyMng_c::mActPlayerInfo = state->activePlayersBitfield;
-    daPyMng_c::mRest[0] = state->playerStates[0].lives;
-    daPyMng_c::mRest[1] = state->playerStates[1].lives;
-    daPyMng_c::mRest[2] = state->playerStates[2].lives;
-    daPyMng_c::mRest[3] = state->playerStates[3].lives;
-    daPyMng_c::mCoin[0] = state->playerStates[0].coins;
-    daPyMng_c::mCoin[1] = state->playerStates[1].coins;
-    daPyMng_c::mCoin[2] = state->playerStates[2].coins;
-    daPyMng_c::mCoin[3] = state->playerStates[3].coins;
-    daPyMng_c::mScore = state->score;
-
-    // Reset the timer time
-    dStageTimer_c::m_instance->preciseTime = state->timerPreciseTime;
-
-    // Reset dActorCreateMng_c (it gets disabled when the goal pole is
-    // touched, so we'd like to re-enable it)
-    dActorCreateMng_c::m_instance->ActorCreateInfoClear();
 }
 
 
-void save_zone_state_players(ZoneState *state) {
-    for (int i = 0; i < 4; i++) {
-        dAcPy_c *player = daPyMng_c::getPlayer(i);
-        if (player == NULL)
-            continue;
-
-        state->playerStates[i].powerup = player->powerup;
-        state->playerStates[i].starTimer = player->starTimer;
-    }
+void restore_zone_state_early(ZoneState *state) {
+    restore_dScStage_c(&state->dScStage_c);
+    restore_daPyMng_c(&state->daPyMng_c);
+    restore_dCyuukan_c();
 }
 
 
-void restore_zone_state_players(ZoneState *state) {
-    for (int i = 0; i < 4; i++) {
-        dAcPy_c *player = daPyMng_c::getPlayer(i);
-        if (player == NULL)
-            continue;
-
-        player->setPowerupAlt((Powerup)(state->playerStates[i].powerup));
-
-        u32 starTimer = state->playerStates[i].starTimer;
-        if (starTimer == 0) {
-            player->vtable->endStar(player);
-        } else {
-            player->vtable->startStar(player, 1, starTimer);
-        }
-    }
+void restore_zone_state_late(ZoneState *state) {
+    restore_dStageTimer_c(&state->dStageTimer_c);
+    restore_dActorCreateMng_c();
+    restore_dBgParameter_c();
+    restore_dFlagCtrl_c();
 }
 
 
-// Hook at the end of dScStage_c::create()
-kmBranchDefCpp(0x80924e58, NULL, u32, ) {
+extern "C" int dScStage_c_create(dScStage_c *this_);
+
+int dScStage_c_create_wrapper(dScStage_c *this_) {
+    // TODO: is there a way to make this logic less repetitive?
+
+    // Save or restore all info that must be handled *before*
+    // dScStage_c::create() runs
     if (!is_restoring_stage) {
         if (dScStage_c::getCourseIn()) {
-            save_zone_state(&initial_state_of_current_stage);
+            save_zone_state_early(&initial_state_of_current_stage);
         }
 
-        save_zone_state(&initial_state_of_current_zone);
+        save_zone_state_early(&initial_state_of_current_zone);
     } else {
         if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
-            restore_zone_state(&initial_state_of_current_zone);
+            restore_zone_state_early(&initial_state_of_current_zone);
         } else {
-            restore_zone_state(&initial_state_of_current_stage);
+            restore_zone_state_early(&initial_state_of_current_stage);
+        }
+    }
+
+    // Run dScStage_c::create()
+    int res = dScStage_c_create(this_);
+
+    // Save or restore all info that must be handled *after*
+    // dScStage_c::create() runs
+    if (!is_restoring_stage) {
+        if (dScStage_c::getCourseIn()) {
+            save_zone_state_late(&initial_state_of_current_stage);
+        }
+
+        save_zone_state_late(&initial_state_of_current_zone);
+    } else {
+        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
+            restore_zone_state_late(&initial_state_of_current_zone);
+        } else {
+            restore_zone_state_late(&initial_state_of_current_stage);
         }
 
         is_restoring_stage = false;
     }
-    return 1;
+
+    return res;
 }
 
-// Hook at the end of daPyMng_c::createCourseInit()
-// (this hook needs to exist because players are created after
-// dScStage_c::create() finishes executing)
-kmBranchDefCpp(0x8005f4cc, NULL, void, ) {
-    if (!is_restoring_players) {
-        if (dScStage_c::getCourseIn()) {
-            save_zone_state_players(&initial_state_of_current_stage);
-        }
-
-        save_zone_state_players(&initial_state_of_current_zone);
-    } else {
-        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
-            restore_zone_state_players(&initial_state_of_current_zone);
-        } else {
-            restore_zone_state_players(&initial_state_of_current_stage);
-        }
-
-        is_restoring_players = false;
-    }
-}
+kmWritePointer(0x8098dc30, dScStage_c_create_wrapper);
 
 
 void trigger_stage_reload() {
+    if (dScStage_c::m_instance == NULL) {
+        return;
+    }
+
     // Trigger a wipe
     dFader_c::setFader(dFader_c::FADER_TYPE_CIRCLE_5);
 
@@ -233,7 +299,7 @@ void trigger_stage_reload() {
 }
 
 
-void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
+void trigger_zone_reload(dAcPy_c *player, bool keep_current_pos) {
     if (keep_current_pos) {
         FakeEntrance.x = player->pos.x - 8.0f;
         FakeEntrance.y = -(player->pos.y + 16.0f);
@@ -244,7 +310,13 @@ void trigger_zone_reload(daPlBase_c *player, bool keep_current_pos) {
         FakeEntrance.dest_id = curEntranceNonFake;
     }
 
-    player->useNextGotoBlock(FAKE_ENTRANCE_ID, 0, 0);
+    dNext_c::m_instance->initGoto(
+        dScStage_c::m_instance->curArea,
+        FAKE_ENTRANCE_ID,
+        dFader_c::FADER_TYPE_WAVY
+    );
+    dNext_c::m_instance->m_timer = 0;
+    player->vtable->changeNextScene(player, 0);
 
     is_restoring_stage = true;
     is_restoring_players = true;
