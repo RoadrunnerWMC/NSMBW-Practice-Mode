@@ -1,6 +1,8 @@
 #include "game.h"
-#include "savestate_lite.h"
+
 #include "powerup.h"
+#include "savestate_lite.h"
+#include "stage_control.h"
 #include "zone_control.h"
 
 

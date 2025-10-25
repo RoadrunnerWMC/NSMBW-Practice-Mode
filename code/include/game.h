@@ -75,8 +75,6 @@ public:
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 rollingHistoryOfTwo[0xa0];  // dummy
     /* 0xc4 */ u8 rollingHistoryOfTwoModifiedByFlags[0xa0];  // dummy
-
-    /* 8005e040 */ void update();
 };
 
 
@@ -121,29 +119,22 @@ public:
 
     /* 0x348 */ u8 direction;
 
-    /* 0x349 */ u8 pad4[0x44];
-
-    /* 0x38d */ u8 m_plrNo;
-
-    /* 0x38e */ u8 pad5[0xb16];
+    /* 0x349 */ u8 pad4[0xb5b];
 
     /* 0xea4 */ dAcPyKey_c input;
 
-    /* 0x1008 */ u8 pad6[0x68];
+    /* 0x1008 */ u8 pad5[0x6c];
 
-    /* 0x1070 */ u32 starTimer;
     /* 0x1074 */ u32 flashTimer;
 
-    /* 0x1078 */ u8 pad7[0x18];
+    /* 0x1078 */ u8 pad6[0x18];
 
     /* 0x1090 */ int powerup;
 
     // technically in dAcPy_c probably
-    /* 0x1094 */ u8 pad8[0x498];
+    /* 0x1094 */ u8 pad7[0x498];
     /* 0x152c */ Vec camPos;
 
-    /* 80052ef0 */ void useNextGotoBlock(u32 exitID, u32 delay, u32 transition);  // unofficial method name
-    /* 80056cf0 */ bool isStatus(int flags);
     /* 80057e70 */ void playSound(unsigned int id, long unk);  // unofficial method name
 };
 
@@ -154,7 +145,6 @@ class daYoshi_c : public daPlBase_c {
 
 class dAcPy_c : public daPlBase_c {
 public:
-    /* 80139a90 */ daYoshi_c *getRideYoshi();
     /* 801416c0 */ void setPowerupAlt(Powerup powerup);  // unofficial method name
     /* 80144c60 */ void setSceneChangeInfo();
 };
@@ -315,10 +305,8 @@ public:
     /* 0x1211 */ u8 curEntrance;
 
     /* 803744b0 */ static u32 mCollectionCoin[3];
-    /* 8042a4a4 */ static dCamera_c *m_camera[1];
     /* 8042a4a8 */ static dScStage_c *m_instance;
 
-    /* 8005ec90 */ static bool getCourseIn();
     /* 809253e0 */ void restoreOldPlayerInfo();
 };
 
@@ -374,61 +362,11 @@ public:
 };
 
 
-namespace EGG {
-    class CoreController {
-    public:
-        /* 0x00 */ u8 pad1[0x18];
-        /* 0x18 */ u32 hold;  // really in KPad
-    };
-}
-
-
-
-namespace mPad {
-    class CH_e {
-    public:
-        /* 0x00 */ u8 MPAD_0;
-        /* 0x01 */ u8 MPAD_1;
-        /* 0x02 */ u8 MPAD_2;
-        /* 0x03 */ u8 MPAD_3;
-    };
-
-    /* 80377f88 */ static EGG::CoreController *g_core[4];
-};
-
-
 class dGameKeyCore_c {
 public:
     /* 0x00 */ void* vtable;
     /* 0x04 */ u32 id;  // really mPad::CH_e
     /* 0x08 */ ControlStyle controllerType;
-    /* 0x0c */ u32 hold;
-    /* 0x10 */ u32 prev_hold;
-    /* 0x14 */ u32 held_buttons;
-    /* 0x18 */ u32 prev_held_buttons;
-    /* 0x1c */ u32 newly_pressed;
-    /* 0x20 */ u32 field_20;
-    /* 0x24 */ u32 field_24;
-    /* 0x28 */ u32 field_28;
-    /* 0x2c */ u32 field_2C;
-    /* 0x30 */ u32 field_30;
-    /* 0x34 */ Vec acc;
-    /* 0x40 */ Vec prev_acc;
-    /* 0x4c */ Vec2 acc_vert_x;
-    /* 0x54 */ Vec2 prev_acc_vert_x;
-    /* 0x5c */ Vec2 acc_vert_y;
-    /* 0x64 */ Vec2 acc_vert_z;
-    /* 0x74 */ Vec2 angle;
-    /* 0x7c */ Vec2 last_angle;
-    /* 0x84 */ f32 move_dist;
-    /* 0x88 */ f32 prev_move_dist;
-    /* 0x8c */ bool is_shaking;
-    /* 0x8d */ u8 field_8D;
-    /* 0x8e */ u16 tiltAmount;
-    /* 0x90 */ s8 shake_timer1;
-    /* 0x91 */ s8 shake_timer2;
-    /* 0x92 */ u8 shake_timer3;
-    /* 0x93 */ u8 field_93;
 };
 
 
@@ -446,8 +384,6 @@ public:
     /* 0x000 */ u16 items[128];
 
     /* 8042a210 */ static dFlagCtrl_c *m_instance;
-
-    /* 800b0eb0 */ void clearAllFlagData();
 };
 
 
@@ -475,8 +411,6 @@ public:
     /* 0x1d */ u8 pad3[0x3];
     /* 0x20 */ u32 starCoinStatus[3];
     /* 0x2c */ u32 playerIds[2];
-
-    /* 8008edb0 */ void clear();
 };
 
 
@@ -514,13 +448,9 @@ public:
     /* 0x008 */ dCyuukan_c cyuukan;
 
     /* 8042a25c */ static dInfo_c *m_instance;
-    /* 8042a260 */ static u32 mGameFlag;
 
     /* 800bb7d0 */ void startGame(const dInfo_c::StartGameInfo_s&);
 };
-
-// unofficial function name
-void ReturnToAnotherSceneAfterLevel(u32, u32, u32, u32);
 
 
 class dFader_c {
@@ -535,12 +465,6 @@ public:
     } fader_type_e;
 
     /* 800b0db0 */ static bool setFader(fader_type_e type);
-};
-
-
-class dScene_c {
-public:
-    /* 800e1f50 */ static void setNextScene(u16, unsigned long, bool);
 };
 
 
