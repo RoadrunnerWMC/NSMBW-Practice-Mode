@@ -28,6 +28,9 @@ enum ControlStyle {
 #define PF_RIDES_YOSHI 75
 
 
+typedef struct { f32 x, y, z; } mVec3_c;
+
+
 class dAcPyKey_c {
 public:
     // For the "held"/"pressed" fields:
@@ -474,4 +477,20 @@ public:
 class dAudio {
 public:
     /* 8006a6a0 */ static void hashname_a2bd17ff_6bcc38cc(s32);
+};
+
+
+class dCdFile_c {
+public:
+    /* 0x00 */ u8 pad[0x3b0];
+
+    /* 8008e770 */ u8 getAreaNo(mVec3_c*);
+};
+
+
+class dCd_c {
+public:
+    /* 0x00 */ dCdFile_c areas[4];
+
+    /* 8042a178 */ static dCd_c *m_instance;
 };

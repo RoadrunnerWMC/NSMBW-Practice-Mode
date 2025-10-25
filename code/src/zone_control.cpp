@@ -1,11 +1,7 @@
 #include "game.h"
+#include "entrance_control.h"
 #include "zone_control.h"
 
-
-#define FAKE_ENTRANCE_ID 254
-
-NextGoto FakeEntrance = {0};
-bool ForceFacingLeft = false;
 
 struct STATE_dScStage_c {
     u32 mCollectionCoin[3];  // star coin collection states
@@ -73,23 +69,6 @@ struct ZoneState {
 
 ZoneState initial_state_of_current_zone;
 bool is_restoring_zone = false;
-
-
-u8 curEntranceNonFake = 0;
-kmBranchDefAsm(0x809261bc, 0x809261c0) {
-    nofralloc
-
-    cmpwi r4, FAKE_ENTRANCE_ID
-    beq fake
-
-    lis r6, curEntranceNonFake@ha
-    addi r6, r6, curEntranceNonFake@l
-    stb r4, 0(r6);
-
-fake:
-    stb r4, 0x1211(r3)  // original instruction
-    blr
-}
 
 
 void save_dScStage_c(STATE_dScStage_c *state) {
@@ -298,13 +277,12 @@ kmWritePointer(0x8098dc30, dScStage_c_create_wrapper);
 
 void trigger_zone_reload(dAcPy_c *player, bool keep_current_pos) {
     if (keep_current_pos) {
-        FakeEntrance.x = player->pos.x - 8.0f;
-        FakeEntrance.y = -(player->pos.y + 16.0f);
-        FakeEntrance.zone_id = dScStage_c::m_instance->curZone;
-        FakeEntrance.dest_id = FAKE_ENTRANCE_ID;
-        ForceFacingLeft = (player->direction == 1);
+        configure_fake_entrance_to_pos(0, player->pos.x, player->pos.y);
+        if (player->direction == 1) {
+            force_player_face_left_at_next_spawn();
+        }
     } else {
-        FakeEntrance.dest_id = curEntranceNonFake;
+        configure_fake_entrance_to_other(0, last_non_fake_entrance_id());
     }
 
     dNext_c::m_instance->initGoto(
@@ -316,39 +294,4 @@ void trigger_zone_reload(dAcPy_c *player, bool keep_current_pos) {
     player->vtable->changeNextScene(player, 0);
 
     is_restoring_zone = true;
-}
-
-
-extern "C" NextGoto *getNextGotoP__9dCdFile_cFUc_PLUS_FOUR(u8 id);
-
-kmBranchDefAsm(0x8008e3d0, NULL) {
-    nofralloc
-
-    cmpwi r4, FAKE_ENTRANCE_ID
-    beq fake
-    lwz r0, 0x90(r3)  // original instruction
-    b getNextGotoP__9dCdFile_cFUc_PLUS_FOUR
-
-fake:
-    lis r3, FakeEntrance@h
-    ori r3, r3, FakeEntrance@l
-    blr
-}
-
-
-// TODO: this approach doesn't really work for multiplayer
-kmBranchDefAsm(0x8005ef08, 0x8005ef0c) {
-    nofralloc
-
-    lis r4, ForceFacingLeft@ha
-    lbz r0, ForceFacingLeft@l(r4)
-    cmpwi r0, 0
-    beq finish
-    li r0, 0
-    stb r0, ForceFacingLeft@l(r4)
-    li r6, 1
-
-finish:
-    clrlwi r4, r3, 28  // original instruction
-    blr
 }
