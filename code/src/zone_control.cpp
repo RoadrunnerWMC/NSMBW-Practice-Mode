@@ -228,10 +228,6 @@ void restore_dStageTimer_c(STATE_dStageTimer_c *state) {
 
 void restore_dActorCreateMng_c(STATE_dActorCreateMng_c *state) {
     memcpy(dActorCreateMng_c::m_instance, state, sizeof(STATE_dActorCreateMng_c));
-
-    // Reset dActorCreateMng_c itself (it gets disabled when the goal
-    // pole is touched, so we'd like to re-enable it)
-    dActorCreateMng_c::m_instance->ActorCreateInfoClear();
 }
 
 

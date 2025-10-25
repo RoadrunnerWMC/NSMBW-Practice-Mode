@@ -332,7 +332,6 @@ public:
 
     /* 8042a028 */ static dActorCreateMng_c *m_instance;
 
-    /* 80068040 */ void ActorCreateInfoClear(void);
     /* 80068230 */ void MapActorInital_next(void);
 };
 
