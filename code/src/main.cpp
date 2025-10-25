@@ -264,6 +264,10 @@ kmBranchDefAsm(0x800b5e30, 0x800b5e34) {
 
 
 bool is_title_screen_stage() {
+    if (dScStage_c::m_instance == NULL) {
+        return false;
+    }
+
     // 01-40.arc
     return dScStage_c::m_instance->curWorldAndLevel == ((0 << 8) | 39);
 }
