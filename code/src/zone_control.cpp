@@ -40,11 +40,35 @@ struct STATE_dStageTimer_c {
     u32 preciseTime;
 };
 
+struct STATE_dActorCreateMng_c {
+    // This struct MUST exactly match the beginning of dActorCreateMng_c
+    // itself, since we currently just do a single memcpy() to copy
+    // between the two. Be careful if editing this struct!
+    u32 counters[4];
+    u16 storedShorts[1000];
+    u8 storedBytes[1000];
+    u16 unkBC8;
+    bool isEndingDemo;
+    bool stopped;
+};
+
+struct STATE_dFlagCtrl_c {
+    // This struct MUST exactly match the beginning of dFlagCtrl_c
+    // itself, since we currently just do a single memcpy() to copy
+    // between the two. Be careful if editing this struct!
+    u16 items[128];
+};
+
 struct ZoneState {
+    // Saved/restored "early" (before dScStage_c::create())
     STATE_dScStage_c dScStage_c;
     STATE_daPyMng_c daPyMng_c;
     STATE_dCyuukan_c dCyuukan_c;
+
+    // Saved/restored "late" (after dScStage_c::create())
     STATE_dStageTimer_c dStageTimer_c;
+    STATE_dActorCreateMng_c dActorCreateMng_c;
+    STATE_dFlagCtrl_c dFlagCtrl_c;
 };
 
 enum RestorationType {
@@ -126,6 +150,20 @@ void save_dStageTimer_c(STATE_dStageTimer_c *state) {
 }
 
 
+void save_dActorCreateMng_c(STATE_dActorCreateMng_c *state) {
+    // We save the first 0xbcc bytes of dActorCreateMng exactly as-is,
+    // so let's just do a memcpy
+    memcpy(state, dActorCreateMng_c::m_instance, sizeof(STATE_dActorCreateMng_c));
+}
+
+
+void save_dFlagCtrl_c(STATE_dFlagCtrl_c *state) {
+    // We save all 0x100 bytes of dFlagCtrl_c exactly as-is, so let's
+    // just do a memcpy
+    memcpy(state, dFlagCtrl_c::m_instance, sizeof(STATE_dFlagCtrl_c));
+}
+
+
 void save_zone_state_early(ZoneState *state) {
     save_dScStage_c(&state->dScStage_c);
     save_daPyMng_c(&state->daPyMng_c);
@@ -135,6 +173,8 @@ void save_zone_state_early(ZoneState *state) {
 
 void save_zone_state_late(ZoneState *state) {
     save_dStageTimer_c(&state->dStageTimer_c);
+    save_dActorCreateMng_c(&state->dActorCreateMng_c);
+    save_dFlagCtrl_c(&state->dFlagCtrl_c);
 }
 
 
@@ -194,14 +234,8 @@ void restore_dStageTimer_c(STATE_dStageTimer_c *state) {
 }
 
 
-void restore_dActorCreateMng_c() {
-    // Reset stored sprite data in dActorCreateMng_c
-    // (resets spawn status for various types of enemies, mainly)
-    // TODO: maybe just reset this for only the current zone, instead of
-    // the whole level?
-    // Since storedShorts and storedBytes are adjacent in memory, for
-    // efficiency, I just clear both of them with one call
-    memset(&dActorCreateMng_c::m_instance->storedShorts, 0, 2000 + 1000);
+void restore_dActorCreateMng_c(STATE_dActorCreateMng_c *state) {
+    memcpy(dActorCreateMng_c::m_instance, state, sizeof(STATE_dActorCreateMng_c));
 
     // Reset dActorCreateMng_c itself (it gets disabled when the goal
     // pole is touched, so we'd like to re-enable it)
@@ -222,13 +256,8 @@ void restore_dBgParameter_c() {
 }
 
 
-void restore_dFlagCtrl_c() {
-    // Reset dFlagCtrl_c
-    // (resets spawn status for star coins, red rings, roulette blocks,
-    // etc.)
-    dFlagCtrl_c::m_instance->clearAllFlagData();
-    // TODO: maybe just reset this for only the current zone, instead of
-    // the whole level?
+void restore_dFlagCtrl_c(STATE_dFlagCtrl_c *state) {
+    memcpy(dFlagCtrl_c::m_instance, state, sizeof(STATE_dFlagCtrl_c));
 }
 
 
@@ -241,9 +270,9 @@ void restore_zone_state_early(ZoneState *state) {
 
 void restore_zone_state_late(ZoneState *state) {
     restore_dStageTimer_c(&state->dStageTimer_c);
-    restore_dActorCreateMng_c();
+    restore_dActorCreateMng_c(&state->dActorCreateMng_c);
     restore_dBgParameter_c();
-    restore_dFlagCtrl_c();
+    restore_dFlagCtrl_c(&state->dFlagCtrl_c);
 }
 
 

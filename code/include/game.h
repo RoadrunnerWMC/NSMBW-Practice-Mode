@@ -340,6 +340,7 @@ public:
     /* 0x7e0 */ u8 storedBytes[1000];
     /* 0xbc8 */ u16 unkBC8;
     /* 0xbca */ bool isEndingDemo;
+    /* 0xbcb */ bool stopped;
 
     /* 8042a028 */ static dActorCreateMng_c *m_instance;
 
@@ -442,6 +443,8 @@ public:
 
 class dFlagCtrl_c {
 public:
+    /* 0x000 */ u16 items[128];
+
     /* 8042a210 */ static dFlagCtrl_c *m_instance;
 
     /* 800b0eb0 */ void clearAllFlagData();
