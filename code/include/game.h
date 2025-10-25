@@ -76,7 +76,7 @@ public:
     /* 0x24 */ u8 rollingHistoryOfTwo[0xa0];  // dummy
     /* 0xc4 */ u8 rollingHistoryOfTwoModifiedByFlags[0xa0];  // dummy
 
-    void update();
+    /* 8005e040 */ void update();
 };
 
 
@@ -96,10 +96,6 @@ public:
 
 class daPlBase_c {
 public:
-    void useNextGotoBlock(u32 exitID, u32 delay, u32 transition);  // unofficial method name
-    void playSound(unsigned int id, long unk);  // unofficial method name
-    bool isStatus(int flags);
-
     /* 0x000 */ u8 pad1[0x60];
 
     /* 0x060 */ daPlBase_c_vtable *vtable;
@@ -145,6 +141,10 @@ public:
     // technically in dAcPy_c probably
     /* 0x1094 */ u8 pad8[0x498];
     /* 0x152c */ Vec camPos;
+
+    /* 80052ef0 */ void useNextGotoBlock(u32 exitID, u32 delay, u32 transition);  // unofficial method name
+    /* 80056cf0 */ bool isStatus(int flags);
+    /* 80057e70 */ void playSound(unsigned int id, long unk);  // unofficial method name
 };
 
 
@@ -154,9 +154,9 @@ class daYoshi_c : public daPlBase_c {
 
 class dAcPy_c : public daPlBase_c {
 public:
-    void setPowerupAlt(Powerup powerup);  // unofficial method name
-    daYoshi_c *getRideYoshi();
-    void setSceneChangeInfo();
+    /* 80139a90 */ daYoshi_c *getRideYoshi();
+    /* 801416c0 */ void setPowerupAlt(Powerup powerup);  // unofficial method name
+    /* 80144c60 */ void setSceneChangeInfo();
 };
 
 
@@ -175,8 +175,8 @@ public:
     /* 80429f98 */ static u16 m_star_count[4];
     /* 80429fa0 */ static u32 mScore;
 
-    static dAcPy_c *getPlayer(int num);
-    static void stopYoshiBGM();
+    /* 8005f900 */ static dAcPy_c *getPlayer(int num);
+    /* 80060860 */ static void stopYoshiBGM();
 };
 
 
@@ -207,13 +207,13 @@ public:
     /* 0x88 */ int p_switch_timers[3];
     /* 0x94 */ void *bgHeap;
 
-    static dBgParameter_c *ms_Instance_p;
+    /* 8042a0e0 */ static dBgParameter_c *ms_Instance_p;
 };
 
 
 class dBg_c {
 public:
-    u8 pad1[0x8fe18];
+    /* 0x00000 */ u8 pad1[0x8fe18];
     /* 0x8fe18 */ f32 unk8FE18;
     /* 0x8fe1c */ u8 pad2[0x28];
     /* 0x8fe44 */ f32 unk8FE44;
@@ -265,7 +265,7 @@ public:
     /* 0x90a18 */ f32 y2_calc_from_entrance;
     // length: 0x90aac
 
-    static dBg_c *m_bg_p;
+    /* 0x8042a0b0 */ static dBg_c *m_bg_p;
 };
 
 
@@ -290,13 +290,13 @@ struct NextGoto {
 
 class dCamera_c {
 public:
-    u8 pad[0x384];
+    /* 0x000 */ u8 pad[0x384];
 };
 
 
 class dScStage_c {
 public:
-    u8 pad[0x120c];
+    /* 0x0000 */ u8 pad[0x120c];
     // Using a union so we can do some optimizations in certain places
     union {
         struct {
@@ -314,42 +314,42 @@ public:
     /* 0x1210 */ u8 curLayer;
     /* 0x1211 */ u8 curEntrance;
 
-    static dCamera_c *m_camera[1];
-    static dScStage_c *m_instance;
-    static u32 mCollectionCoin[3];
+    /* 803744b0 */ static u32 mCollectionCoin[3];
+    /* 8042a4a4 */ static dCamera_c *m_camera[1];
+    /* 8042a4a8 */ static dScStage_c *m_instance;
 
-    static bool getCourseIn();
-    void restoreOldPlayerInfo();
+    /* 8005ec90 */ static bool getCourseIn();
+    /* 809253e0 */ void restoreOldPlayerInfo();
 };
 
 
 class dNext_c {
 public:
-    void initGoto(u8, u8, u32);
-
-    static dNext_c *m_instance;
-
     /* 0x00 */ u8 pad[0x1c];
     /* 0x1c */ s16 m_timer;
+
+    /* 8042a2a0 */ static dNext_c *m_instance;
+
+    /* 800cfd90 */ void initGoto(u8, u8, u32);
 };
 
 class dActorCreateMng_c {
 public:
-    void ActorCreateInfoClear(void);
-    void MapActorInital_next(void);
-
-    static dActorCreateMng_c *m_instance;
-
     /* 0x000 */ u32 counters[4];
     /* 0x010 */ u16 storedShorts[1000];
     /* 0x7e0 */ u8 storedBytes[1000];
     /* 0xbc8 */ u16 unkBC8;
     /* 0xbca */ bool isEndingDemo;
+
+    /* 8042a028 */ static dActorCreateMng_c *m_instance;
+
+    /* 80068040 */ void ActorCreateInfoClear(void);
+    /* 80068230 */ void MapActorInital_next(void);
 };
 
 class LytTextBox_c {
 public:
-    void setText(const wchar_t*, long, ...);
+    /* 800c9ee0 */ void setText(const wchar_t*, long, ...);
 };
 
 class dGameDisplay_c {
@@ -369,7 +369,7 @@ public:
     /* 0xb */ bool timeLessThan100;
     /* 0xc */ bool isPaused;
 
-    static dStageTimer_c *m_instance;
+    /* 8042a350 */ static dStageTimer_c *m_instance;
 };
 
 
@@ -392,15 +392,14 @@ namespace mPad {
         /* 0x03 */ u8 MPAD_3;
     };
 
-    static EGG::CoreController *g_core[4];
+    /* 80377f88 */ static EGG::CoreController *g_core[4];
 };
 
 
 class dGameKeyCore_c {
 public:
     /* 0x00 */ void* vtable;
-    ///* 0x04 */ mPad::CH_e id;
-    /* 0x04 */ u32 id;
+    /* 0x04 */ u32 id;  // really mPad::CH_e
     /* 0x08 */ ControlStyle controllerType;
     /* 0x0c */ u32 hold;
     /* 0x10 */ u32 prev_hold;
@@ -437,21 +436,21 @@ public:
     /* 0x00 */ void *vtable;
     /* 0x04 */ dGameKeyCore_c *remocons[4];
 
-    static dGameKey_c *m_instance;
+    /* 8042a230 */ static dGameKey_c *m_instance;
 };
 
 
 class dFlagCtrl_c {
 public:
-    void clearAllFlagData();
+    /* 8042a210 */ static dFlagCtrl_c *m_instance;
 
-    static dFlagCtrl_c *m_instance;
+    /* 800b0eb0 */ void clearAllFlagData();
 };
 
 
 class dCyuukan_c {
 public:
-    void clear();
+    /* 8008edb0 */ void clear();
 };
 
 
@@ -485,13 +484,13 @@ public:
         /* 0x0f */ u8 level_2;
     } StartGameInfo_s;
 
-    void startGame(const dInfo_c::StartGameInfo_s&);
-
-    static dInfo_c *m_instance;
-    static u32 mGameFlag;
-
     /* 0x000 */ u8 pad[0x008];
     /* 0x008 */ dCyuukan_c cyuukan;
+
+    /* 8042a25c */ static dInfo_c *m_instance;
+    /* 8042a260 */ static u32 mGameFlag;
+
+    /* 800bb7d0 */ void startGame(const dInfo_c::StartGameInfo_s&);
 };
 
 // unofficial function name
@@ -509,17 +508,17 @@ public:
         FADER_TYPE_CIRCLE_5,
     } fader_type_e;
 
-    static bool setFader(fader_type_e type);
+    /* 800b0db0 */ static bool setFader(fader_type_e type);
 };
 
 
 class dScene_c {
 public:
-    static void setNextScene(u16, unsigned long, bool);
+    /* 800e1f50 */ static void setNextScene(u16, unsigned long, bool);
 };
 
 
 class dAudio {
 public:
-    static void hashname_a2bd17ff_6bcc38cc(s32);
+    /* 8006a6a0 */ static void hashname_a2bd17ff_6bcc38cc(s32);
 };
