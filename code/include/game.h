@@ -450,6 +450,29 @@ public:
 
 class dCyuukan_c {
 public:
+    /* 0x00 */ void *vtable;
+    /* 0x04 */ u8 pad1[0x4];
+    /* 0x08 */ Vec playerSpawnPos;
+    /* 0x14 */ u8 pad2[0x4];
+    // Using a union so we can do some optimizations in certain places
+    union {
+        struct {
+            /* 0x18 */ u8 curWorld;
+            /* 0x19 */ u8 curLevel;
+            /* 0x1a */ u8 curArea;
+            /* 0x1b */ u8 curEntrance;
+        };
+        struct {
+            /* 0x18 */ u16 curWorldAndLevel;
+            /* 0x1a */ u16 curAreaAndEntrance;
+        };
+        /* 0x18 */ u32 curWorldLevelAreaAndEntrance;
+    };
+    /* 0x1c */ u8 isKinopioInChukan;
+    /* 0x1d */ u8 pad3[0x3];
+    /* 0x20 */ u32 starCoinStatus[3];
+    /* 0x2c */ u32 playerIds[2];
+
     /* 8008edb0 */ void clear();
 };
 

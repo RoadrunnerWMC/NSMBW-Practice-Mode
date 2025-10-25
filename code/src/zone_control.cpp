@@ -29,6 +29,13 @@ struct STATE_daPyMng_c {
     u32 mScore;
 };
 
+struct STATE_dCyuukan_c {
+    Vec playerSpawnPos;
+    u32 curWorldLevelAreaAndEntrance;
+    bool isKinopioInChukan;
+    u32 starCoinStatus[3];
+};
+
 struct STATE_dStageTimer_c {
     u32 preciseTime;
 };
@@ -36,6 +43,7 @@ struct STATE_dStageTimer_c {
 struct ZoneState {
     STATE_dScStage_c dScStage_c;
     STATE_daPyMng_c daPyMng_c;
+    STATE_dCyuukan_c dCyuukan_c;
     STATE_dStageTimer_c dStageTimer_c;
 };
 
@@ -102,6 +110,17 @@ void save_daPyMng_c(STATE_daPyMng_c *state) {
 }
 
 
+void save_dCyuukan_c(STATE_dCyuukan_c *state) {
+    dCyuukan_c *cyuukan = &dInfo_c::m_instance->cyuukan;
+    state->playerSpawnPos = cyuukan->playerSpawnPos;
+    state->curWorldLevelAreaAndEntrance = cyuukan->curWorldLevelAreaAndEntrance;
+    state->isKinopioInChukan = cyuukan->isKinopioInChukan;
+    state->starCoinStatus[0] = cyuukan->starCoinStatus[0];
+    state->starCoinStatus[1] = cyuukan->starCoinStatus[1];
+    state->starCoinStatus[2] = cyuukan->starCoinStatus[2];
+}
+
+
 void save_dStageTimer_c(STATE_dStageTimer_c *state) {
     state->preciseTime = dStageTimer_c::m_instance->preciseTime;
 }
@@ -110,6 +129,7 @@ void save_dStageTimer_c(STATE_dStageTimer_c *state) {
 void save_zone_state_early(ZoneState *state) {
     save_dScStage_c(&state->dScStage_c);
     save_daPyMng_c(&state->daPyMng_c);
+    save_dCyuukan_c(&state->dCyuukan_c);
 }
 
 
@@ -158,11 +178,14 @@ void restore_daPyMng_c(STATE_daPyMng_c *state) {
 }
 
 
-void restore_dCyuukan_c() {
-    // If a checkpoint is collected, clear it
-    // (TODO: should really reset it to whatever it was at level load,
-    // but it seems calling cyuukan->courseIN() doesn't do that)
-    dInfo_c::m_instance->cyuukan.clear();
+void restore_dCyuukan_c(STATE_dCyuukan_c *state) {
+    dCyuukan_c *cyuukan = &dInfo_c::m_instance->cyuukan;
+    cyuukan->playerSpawnPos = state->playerSpawnPos;
+    cyuukan->curWorldLevelAreaAndEntrance = state->curWorldLevelAreaAndEntrance;
+    cyuukan->isKinopioInChukan = state->isKinopioInChukan;
+    cyuukan->starCoinStatus[0] = state->starCoinStatus[0];
+    cyuukan->starCoinStatus[1] = state->starCoinStatus[1];
+    cyuukan->starCoinStatus[2] = state->starCoinStatus[2];
 }
 
 
@@ -212,7 +235,7 @@ void restore_dFlagCtrl_c() {
 void restore_zone_state_early(ZoneState *state) {
     restore_dScStage_c(&state->dScStage_c);
     restore_daPyMng_c(&state->daPyMng_c);
-    restore_dCyuukan_c();
+    restore_dCyuukan_c(&state->dCyuukan_c);
 }
 
 
