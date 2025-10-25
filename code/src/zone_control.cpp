@@ -12,18 +12,18 @@ struct STATE_dScStage_c {
 };
 
 struct STATE_daPyMng_c {
-    u32 m_yoshiFruit[NUM_PLAYERS];  // number of Yoshi fruits collected (0-4)
-    u32 mPlayerType[NUM_PLAYERS];   // which character this player is playing as
-    u32 mPlayerMode[NUM_PLAYERS];   // powerup
-    u32 mCreateItem[NUM_PLAYERS];   // flags indicating whether the player is in a
+    u32 m_yoshiFruit[MAX_PLAYERS];  // number of Yoshi fruits collected (0-4)
+    u32 mPlayerType[MAX_PLAYERS];   // which character this player is playing as
+    u32 mPlayerMode[MAX_PLAYERS];   // powerup
+    u32 mCreateItem[MAX_PLAYERS];   // flags indicating whether the player is in a
                                     // bubble and whether they're riding Yoshi
-    u32 mRest[NUM_PLAYERS];         // number of lives
-    u32 mCoin[NUM_PLAYERS];         // number of coins (0-99)
+    u32 mRest[MAX_PLAYERS];         // number of lives
+    u32 mCoin[MAX_PLAYERS];         // number of coins (0-99)
     u32 mNum;                       // number of live players
     u32 mActPlayerInfo;             // bitfield of active players
-    u8 m_yoshiColor[NUM_PLAYERS];
-    u16 m_star_time[NUM_PLAYERS];   // amount of invincibility time left
-    u16 m_star_count[NUM_PLAYERS];  // number of enemies player has killed since
+    u8 m_yoshiColor[MAX_PLAYERS];
+    u16 m_star_time[MAX_PLAYERS];   // amount of invincibility time left
+    u16 m_star_count[MAX_PLAYERS];  // number of enemies player has killed since
                                     // becoming invincible (for determining points
                                     // and 1UPs)
     u32 mScore;
@@ -101,7 +101,7 @@ void save_dScStage_c(STATE_dScStage_c *state) {
 
 void save_daPyMng_c(STATE_daPyMng_c *state) {
     // Have each player update its relevant fields first
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         dAcPy_c *player = daPyMng_c::getPlayer(i);
         if (player != NULL) {
             player->setSceneChangeInfo();
@@ -112,7 +112,7 @@ void save_daPyMng_c(STATE_daPyMng_c *state) {
     state->mActPlayerInfo = daPyMng_c::mActPlayerInfo;
     state->mScore = daPyMng_c::mScore;
 
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         state->mRest[i] = daPyMng_c::mRest[i];
         state->mCoin[i] = daPyMng_c::mCoin[i];
         state->m_yoshiFruit[i] = daPyMng_c::m_yoshiFruit[i];
@@ -184,7 +184,7 @@ void restore_daPyMng_c(STATE_daPyMng_c *state) {
 
     bool enable_yoshi_drums = false;
 
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         daPyMng_c::mRest[i] = state->mRest[i];
         daPyMng_c::mCoin[i] = state->mCoin[i];
         daPyMng_c::m_yoshiFruit[i] = state->m_yoshiFruit[i];

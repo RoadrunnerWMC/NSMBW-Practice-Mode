@@ -3,7 +3,7 @@
 #include <kamek.h>
 
 
-#define NUM_PLAYERS 4
+#define MAX_PLAYERS 4
 
 
 // unofficial enum name
@@ -152,17 +152,17 @@ public:
 
 class daPyMng_c {
 public:
-    /* 80355140 */ static u32 m_yoshiFruit[4];
-    /* 80355160 */ static u32 mPlayerType[4];
-    /* 80355170 */ static u32 mPlayerMode[4];
-    /* 80355180 */ static u32 mCreateItem[4];
-    /* 80355190 */ static u32 mRest[4];
-    /* 803551a0 */ static u32 mCoin[4];
+    /* 80355140 */ static u32 m_yoshiFruit[MAX_PLAYERS];
+    /* 80355160 */ static u32 mPlayerType[MAX_PLAYERS];
+    /* 80355170 */ static u32 mPlayerMode[MAX_PLAYERS];
+    /* 80355180 */ static u32 mCreateItem[MAX_PLAYERS];
+    /* 80355190 */ static u32 mRest[MAX_PLAYERS];
+    /* 803551a0 */ static u32 mCoin[MAX_PLAYERS];
     /* 80429f80 */ static u32 mNum;
     /* 80429f88 */ static u32 mActPlayerInfo;
-    /* 80429f8c */ static u8 m_yoshiColor[4];
-    /* 80429f90 */ static u16 m_star_time[4];
-    /* 80429f98 */ static u16 m_star_count[4];
+    /* 80429f8c */ static u8 m_yoshiColor[MAX_PLAYERS];
+    /* 80429f90 */ static u16 m_star_time[MAX_PLAYERS];
+    /* 80429f98 */ static u16 m_star_count[MAX_PLAYERS];
     /* 80429fa0 */ static u32 mScore;
 
     /* 8005f900 */ static dAcPy_c *getPlayer(int num);
