@@ -71,16 +71,8 @@ struct ZoneState {
     STATE_dFlagCtrl_c dFlagCtrl_c;
 };
 
-enum RestorationType {
-    RESTORATION_TYPE_CURRENT_STAGE,
-    RESTORATION_TYPE_CURRENT_ZONE,
-};
-
-ZoneState initial_state_of_current_stage;
 ZoneState initial_state_of_current_zone;
-bool is_restoring_stage = false;
-bool is_restoring_players = false;
-RestorationType current_restoration_type;
+bool is_restoring_zone = false;
 
 
 u8 curEntranceNonFake = 0;
@@ -283,18 +275,10 @@ int dScStage_c_create_wrapper(dScStage_c *this_) {
 
     // Save or restore all info that must be handled *before*
     // dScStage_c::create() runs
-    if (!is_restoring_stage) {
-        if (dScStage_c::getCourseIn()) {
-            save_zone_state_early(&initial_state_of_current_stage);
-        }
-
+    if (!is_restoring_zone) {
         save_zone_state_early(&initial_state_of_current_zone);
     } else {
-        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
-            restore_zone_state_early(&initial_state_of_current_zone);
-        } else {
-            restore_zone_state_early(&initial_state_of_current_stage);
-        }
+        restore_zone_state_early(&initial_state_of_current_zone);
     }
 
     // Run dScStage_c::create()
@@ -302,20 +286,12 @@ int dScStage_c_create_wrapper(dScStage_c *this_) {
 
     // Save or restore all info that must be handled *after*
     // dScStage_c::create() runs
-    if (!is_restoring_stage) {
-        if (dScStage_c::getCourseIn()) {
-            save_zone_state_late(&initial_state_of_current_stage);
-        }
-
+    if (!is_restoring_zone) {
         save_zone_state_late(&initial_state_of_current_zone);
     } else {
-        if (current_restoration_type == RESTORATION_TYPE_CURRENT_ZONE) {
-            restore_zone_state_late(&initial_state_of_current_zone);
-        } else {
-            restore_zone_state_late(&initial_state_of_current_stage);
-        }
+        restore_zone_state_late(&initial_state_of_current_zone);
 
-        is_restoring_stage = false;
+        is_restoring_zone = false;
     }
 
     return res;
@@ -379,9 +355,7 @@ void trigger_zone_reload(dAcPy_c *player, bool keep_current_pos) {
     dNext_c::m_instance->m_timer = 0;
     player->vtable->changeNextScene(player, 0);
 
-    is_restoring_stage = true;
-    is_restoring_players = true;
-    current_restoration_type = RESTORATION_TYPE_CURRENT_ZONE;
+    is_restoring_zone = true;
 }
 
 
