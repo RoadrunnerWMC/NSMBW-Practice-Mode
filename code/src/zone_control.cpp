@@ -12,21 +12,20 @@ struct STATE_dScStage_c {
 };
 
 struct STATE_daPyMng_c {
-    // (Arrays of length 4 are per-player)
-    u32 m_yoshiFruit[4];  // number of Yoshi fruits collected (0-4)
-    u32 mPlayerType[4];   // which character this player is playing as
-    u32 mPlayerMode[4];   // powerup
-    u32 mCreateItem[4];   // flags indicating whether the player is in a
-                          // bubble and whether they're riding Yoshi
-    u32 mRest[4];         // number of lives
-    u32 mCoin[4];         // number of coins (0-99)
-    u32 mNum;             // number of live players
-    u32 mActPlayerInfo;   // bitfield of active players
-    u8 m_yoshiColor[4];
-    u16 m_star_time[4];   // amount of invincibility time left
-    u16 m_star_count[4];  // number of enemies player has killed since
-                          // becoming invincible (for determining points
-                          // and 1UPs)
+    u32 m_yoshiFruit[NUM_PLAYERS];  // number of Yoshi fruits collected (0-4)
+    u32 mPlayerType[NUM_PLAYERS];   // which character this player is playing as
+    u32 mPlayerMode[NUM_PLAYERS];   // powerup
+    u32 mCreateItem[NUM_PLAYERS];   // flags indicating whether the player is in a
+                                    // bubble and whether they're riding Yoshi
+    u32 mRest[NUM_PLAYERS];         // number of lives
+    u32 mCoin[NUM_PLAYERS];         // number of coins (0-99)
+    u32 mNum;                       // number of live players
+    u32 mActPlayerInfo;             // bitfield of active players
+    u8 m_yoshiColor[NUM_PLAYERS];
+    u16 m_star_time[NUM_PLAYERS];   // amount of invincibility time left
+    u16 m_star_count[NUM_PLAYERS];  // number of enemies player has killed since
+                                    // becoming invincible (for determining points
+                                    // and 1UPs)
     u32 mScore;
 };
 
@@ -78,7 +77,7 @@ void save_dScStage_c(STATE_dScStage_c *state) {
 
 void save_daPyMng_c(STATE_daPyMng_c *state) {
     // Have each player update its relevant fields first
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
         dAcPy_c *player = daPyMng_c::getPlayer(i);
         if (player != NULL) {
             player->setSceneChangeInfo();
@@ -89,7 +88,7 @@ void save_daPyMng_c(STATE_daPyMng_c *state) {
     state->mActPlayerInfo = daPyMng_c::mActPlayerInfo;
     state->mScore = daPyMng_c::mScore;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
         state->mRest[i] = daPyMng_c::mRest[i];
         state->mCoin[i] = daPyMng_c::mCoin[i];
         state->m_yoshiFruit[i] = daPyMng_c::m_yoshiFruit[i];
@@ -133,7 +132,7 @@ void restore_daPyMng_c(STATE_daPyMng_c *state) {
 
     bool enable_yoshi_drums = false;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
         daPyMng_c::mRest[i] = state->mRest[i];
         daPyMng_c::mCoin[i] = state->mCoin[i];
         daPyMng_c::m_yoshiFruit[i] = state->m_yoshiFruit[i];

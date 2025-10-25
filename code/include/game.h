@@ -3,6 +3,9 @@
 #include <kamek.h>
 
 
+#define NUM_PLAYERS 4
+
+
 // unofficial enum name
 enum Powerup {
     POWERUP_SMALL = 0,
