@@ -321,6 +321,7 @@ public:
     /* 800cfd90 */ void initGoto(u8, u8, u32);
 };
 
+
 class dActorCreateMng_c {
 public:
     /* 0x000 */ u32 counters[4];
@@ -335,10 +336,12 @@ public:
     /* 80068230 */ void MapActorInital_next(void);
 };
 
+
 class LytTextBox_c {
 public:
     /* 800c9ee0 */ void setText(const wchar_t*, long, ...);
 };
+
 
 class dGameDisplay_c {
 public:
@@ -347,6 +350,7 @@ public:
     /* 0x3e4 */ u8 pad2[0xfc];
     /* 0x4e0 */ LytTextBox_c *timerBox;
 };
+
 
 class dStageTimer_c {
 public:
