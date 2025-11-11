@@ -7,8 +7,11 @@ void trigger_stage_reload() {
         return;
     }
 
-    // Trigger a wipe
-    dFader_c::setFader(dFader_c::FADER_TYPE_CIRCLE_5);
+    // To make the transition as quick as possible, request a
+    // "fade"-type fade (i.e. full-screen fade-to-black) with a time of
+    // 0 (instant)
+    dFader_c::setFader(dFader_c::FADER_TYPE_FADE);
+    dScene_c::setFadeOutFrame(0);
 
     // Force a background music fade-out
     // (note: "0" = the currently playing music, "1" = no music, and
