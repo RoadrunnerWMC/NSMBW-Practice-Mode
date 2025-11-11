@@ -9,7 +9,11 @@ void trigger_stage_reload() {
 
     // To make the transition as quick as possible, request a
     // "fade"-type fade (i.e. full-screen fade-to-black) with a time of
-    // 0 (instant)
+    // 0 (instant).
+    // Note that the fade-out duration value persists after the
+    // fade-out, and can affect other scenes such as crsin (aka level
+    // banner), so it should be reset back to its default value of 30
+    // later (we do that in a different hook).
     dFader_c::setFader(dFader_c::FADER_TYPE_FADE);
     dScene_c::setFadeOutFrame(0);
 
@@ -38,4 +42,12 @@ void trigger_stage_reload() {
         /* world_2 */ world,
         /* level_2 */ level
     });
+}
+
+
+// Hook at the end of dScCrsin_c::create() to reset the fade-out length
+// to its default/vanilla value of 30 frames
+kmBranchDefCpp(0x8091f16c, NULL, u32, ) {
+    dScene_c::setFadeOutFrame(30);
+    return 1;
 }
