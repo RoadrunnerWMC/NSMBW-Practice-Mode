@@ -19,12 +19,8 @@
         <folder external="Lang" disc="/KR" recursive="true" />
         <folder external="Lang" disc="/TW" recursive="true" />
         <folder external="Lang" disc="/CN" recursive="true" />
-        <memory offset="0x80001900" valuefile="Code/loader.bin" />
-        <memory offset="0x80328478" value="80001970" original="8015BC60" />
-        <memory offset="0x80328130" value="80001970" original="8015BB20" />
-        <memory offset="0x80327E98" value="80001970" original="8015B930" />
-        <memory offset="0x80334E60" value="80001970" original="8015C060" />
-        <memory offset="0x80333218" value="80001970" original="8015C060" />
+        <memory offset="0x800046E4" valuefile="Code/loader.bin" />
+        <memory offset="0x800042F4" value="4800116C" />
     </patch>
     <patch id="nsmbw_practice_mode_load_state_with_b">
         <memory offset="0x80004028" value="00000001" original="00000000" />
