@@ -1,6 +1,7 @@
 #pragma once
 
 #include <kamek.h>
+#include <kamek_sdk.h>
 
 
 #define MAX_PLAYERS 4
